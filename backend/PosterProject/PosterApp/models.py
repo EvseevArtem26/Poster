@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
@@ -14,7 +15,8 @@ class User(AbstractUser):
 		return self.username
 
 
-class Post(models.model):
+class Post(models.Model):
+	title = models.CharField(max_length=50, blank=True, default='')
 	text = models.TextField()
 	#TODO: Реализовать сохранение медиафайлов
 	#media = models.FileField(null=True)
@@ -22,12 +24,13 @@ class Post(models.model):
 	publication_time = models.DateTimeField(null=True, blank=False)
 	author = models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='author', on_delete=models.CASCADE)
 	#TODO: Создать дополнительное поле/таблицу для разделения опубликованных постов и черновиков
+	platforms = models.ManyToManyField(to='Platform', through='PlatformPost')
 
 	def  __str__(self):
-		return self.text
+		return self.title
 
 
-class AuthKey(models.Model):
+class Platform(models.Model):
 	login = models.CharField(max_length=60)
 	password = models.CharField(max_length=45)
 	email = models.EmailField()
@@ -42,16 +45,18 @@ class AuthKey(models.Model):
 		('YT', 'Youtube'),
 		('TG', 'Telegram')
 	]
-	platform = models.CharField(max_length=1, choices=PLATFORM_CHOICES)
+	platform = models.CharField(max_length=2, choices=PLATFORM_CHOICES)
 	user = models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='user', on_delete=models.CASCADE)
 	
+
 	def __str__(self):
 		return f"{self.platform}-{self.login}"
 
 
 class PlatformPost(models.Model):
 	post = models.ForeignKey(to=Post, on_delete=models.CASCADE)
-	platform = models.ForeignKey(to=AuthKey, on_delete=models.CASCADE)
+	platform = models.ForeignKey(to=Platform, on_delete=models.CASCADE)
 	text = models.TextField(null=True)
-	media = models.FileField(null=True)
+	#TODO: Реализовать сохранение медиафайлов
+	#media = models.FileField(null=True)
 	publication_time = models.DateTimeField(null=True)
