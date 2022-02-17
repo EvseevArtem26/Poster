@@ -1,13 +1,29 @@
 from email.policy import default
+from platform import platform
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 # Create your models here.
 
 
+def user_dir_path(instance, filename):
+	return f"users/{instance.username}/{filename}"
+
+def post_dir_path(instance,filename):
+	user = instance.author
+	return f"users/{user.username}/posts/{instance.title}/{filename}"
+
+def platform_post_dir_path(instance,filename):
+	post = instance.post
+	user = post.author
+	platform = instance.platform
+	title = instance.title if instance.title else post.title
+	return f"users/{user.username}/posts/{platform.platform}/{title}/{filename}"
+
 class User(AbstractUser):
 	username = models.CharField(max_length=45, unique=True)
 	email = models.EmailField(blank=False)
+	userpic = models.ImageField(upload_to=user_dir_path, default='users/default-user-image.png')
 	USERNAME_FIELD = 'username'
 	REQUIRED_FIELDS = ['email']
 
@@ -18,8 +34,7 @@ class User(AbstractUser):
 class Post(models.Model):
 	title = models.CharField(max_length=50, blank=True, default='')
 	text = models.TextField()
-	#TODO: Реализовать сохранение медиафайлов
-	#media = models.FileField(null=True)
+	media = models.FileField(null=True, upload_to=post_dir_path)
 	#TODO: Реализовать возможность добавления нескольких файлов
 	publication_time = models.DateTimeField(null=True, blank=False)
 	author = models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='author', on_delete=models.CASCADE)
@@ -55,8 +70,8 @@ class Platform(models.Model):
 
 class PlatformPost(models.Model):
 	post = models.ForeignKey(to=Post, on_delete=models.CASCADE)
+	title = models.CharField(max_length=50, blank=True, null=True)
 	platform = models.ForeignKey(to=Platform, on_delete=models.CASCADE)
 	text = models.TextField(null=True)
-	#TODO: Реализовать сохранение медиафайлов
-	#media = models.FileField(null=True)
+	media = models.FileField(null=True, upload_to=platform_post_dir_path)
 	publication_time = models.DateTimeField(null=True)

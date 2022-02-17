@@ -2,9 +2,10 @@ from .serializers import *
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import authentication
+from rest_framework.parsers import MultiPartParser, FormParser
 
 # User views
-
+#TODO: Объединить представления 
 class UserListAPIView(generics.ListAPIView):
     serializer_class = UserSerializer
 
@@ -25,11 +26,13 @@ class UserRetrieveAPIView(generics.RetrieveAPIView):
 
 class UserCreateAPIView(generics.CreateAPIView):
 	serializer_class = UserSerializer
+	parser_classes = [MultiPartParser, FormParser]
 	queryset = User.objects.all()
 
 
 class UserUpdateAPIView(generics.UpdateAPIView):
 	serializer_class = UserSerializer
+	parser_classes = [MultiPartParser, FormParser]
 	queryset = User.objects.all()
 
 
@@ -39,6 +42,7 @@ class UserDestroyAPIView(generics.DestroyAPIView):
 
 
 # Post views
+#TODO: Объединить представления 
 
 class PostListAPIView(generics.ListAPIView):
     serializer_class = PostSerializer
@@ -59,10 +63,17 @@ class PostRetrieveAPIView(generics.RetrieveAPIView):
 
 class PostCreateAPIView(generics.CreateAPIView):
 	serializer_class = PostSerializer
+	parser_classes = [MultiPartParser, FormParser]
+	queryset = Post.objects.all()
+	
+
 
 
 class PostUpdateAPIView(generics.UpdateAPIView):
 	serializer_class = PostSerializer
+	parser_classes = [MultiPartParser, FormParser]
+	queryset = Post.objects.all()
+
 
 
 class PostDestroyAPIView(generics.DestroyAPIView):
@@ -70,6 +81,7 @@ class PostDestroyAPIView(generics.DestroyAPIView):
 
 
 # Platform views
+#TODO: Объединить представления 
 
 class PlatformListAPIView(generics.ListAPIView):
     serializer_class = PlatformSerializer

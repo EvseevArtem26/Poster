@@ -6,14 +6,14 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email']
+        fields = ['username', 'email', 'userpic']
 
 
 class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['title', 'text', 'publication_time', 'author', 'platforms']
+        fields = ['title', 'text', 'media', 'publication_time', 'author', 'platforms']
 
 
 class PlatformSerializer(serializers.ModelSerializer):
@@ -27,4 +27,4 @@ class PlatformPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PlatformPost
-        fields = ['post', 'platform', 'text', 'publication_time']
+        fields = ['post', 'title', 'platform', 'text', 'media', 'publication_time']
