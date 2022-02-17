@@ -1,112 +1,50 @@
 from .serializers import *
 from rest_framework import generics
-from rest_framework.response import Response
 from rest_framework import authentication
 from rest_framework.parsers import MultiPartParser, FormParser
 
-# User views
-#TODO: Объединить представления 
-class UserListAPIView(generics.ListAPIView):
-    serializer_class = UserSerializer
+#  User views
 
-    def get_queryset(self):
-        return User.objects.all()
-
-
-class UserRetrieveAPIView(generics.RetrieveAPIView):
+class UserListCreateAPIView(generics.ListCreateAPIView):
 	serializer_class = UserSerializer
+	parser_classes = [MultiPartParser, FormParser]
+
+	def get_queryset(self):
+		return User.objects.all()
+
+
+class UserRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+	serializer_class = UserSerializer
+	parser_classes = [MultiPartParser, FormParser]
 	queryset = User.objects.all()
 	authentication_classes = [authentication.TokenAuthentication]
 
-	def get(self, request, id):
-		user = User.objects.get(pk=id)
-		serializer = UserSerializer(user)
-		return Response(serializer.data)
 
+#  Post views
 
-class UserCreateAPIView(generics.CreateAPIView):
-	serializer_class = UserSerializer
-	parser_classes = [MultiPartParser, FormParser]
-	queryset = User.objects.all()
-
-
-class UserUpdateAPIView(generics.UpdateAPIView):
-	serializer_class = UserSerializer
-	parser_classes = [MultiPartParser, FormParser]
-	queryset = User.objects.all()
-
-
-class UserDestroyAPIView(generics.DestroyAPIView):
-	serializer_class = UserSerializer
-	queryset = User.objects.all()
-
-
-# Post views
-#TODO: Объединить представления 
-
-class PostListAPIView(generics.ListAPIView):
-    serializer_class = PostSerializer
-
-    def get_queryset(self):
-        return Post.objects.all()
-
-
-class PostRetrieveAPIView(generics.RetrieveAPIView):
-	serializer_class = PostSerializer
-	queryset = Post.objects.all()
-
-	def get(self, request, id):
-		post = Post.objects.get(pk=id)
-		serializer = PostSerializer(post)
-		return Response(serializer.data)
-
-
-class PostCreateAPIView(generics.CreateAPIView):
+class PostListCreateAPIView(generics.ListCreateAPIView):
 	serializer_class = PostSerializer
 	parser_classes = [MultiPartParser, FormParser]
-	queryset = Post.objects.all()
-	
+
+	def get_queryset(self):
+		return Post.objects.all()
 
 
-
-class PostUpdateAPIView(generics.UpdateAPIView):
+class PostRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 	serializer_class = PostSerializer
 	parser_classes = [MultiPartParser, FormParser]
 	queryset = Post.objects.all()
 
 
+#  Platform views
 
-class PostDestroyAPIView(generics.DestroyAPIView):
-	serializer_class = PostSerializer
-
-
-# Platform views
-#TODO: Объединить представления 
-
-class PlatformListAPIView(generics.ListAPIView):
+class PlatformListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = PlatformSerializer
 
     def get_queryset(self):
         return Platform.objects.all()
 
 
-class PlatformRetrieveAPIView(generics.RetrieveAPIView):
+class PlatformRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 	serializer_class = PlatformSerializer
 	queryset = Platform.objects.all()
-	
-	def get(self, request, id):
-		post = Platform.objects.get(pk=id)
-		serializer = PlatformSerializer(post)
-		return Response(serializer.data)
-
-
-class PlatformCreateAPIView(generics.CreateAPIView):
-	serializer_class = PlatformSerializer
-
-
-class PlatformUpdateAPIView(generics.UpdateAPIView):
-	serializer_class = PlatformSerializer
-
-
-class PlatformDestroyAPIView(generics.DestroyAPIView):
-	serializer_class = PlatformSerializer
