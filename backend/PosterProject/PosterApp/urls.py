@@ -11,4 +11,6 @@ urlpatterns = [
     path('posts/<int:pk>/', PostRetrieveUpdateDestroyAPIView.as_view()),
     path('platforms/', PlatformListCreateAPIView.as_view()),
     path('platforms/<int:pk>/', PlatformRetrieveUpdateDestroyAPIView.as_view()),
+    path('platform-posts/', PlatformPostListCreateAPIView.as_view()),
+    path('platform-posts/<int:pk>', PlatformRetrieveUpdateDestroyAPIView.as_view())
 ]

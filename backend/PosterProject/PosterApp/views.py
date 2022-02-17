@@ -48,3 +48,19 @@ class PlatformListCreateAPIView(generics.ListCreateAPIView):
 class PlatformRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 	serializer_class = PlatformSerializer
 	queryset = Platform.objects.all()
+
+
+#  PlatformPost views
+
+class PlatformPostListCreateAPIView(generics.ListCreateAPIView):
+	serializer_class = PlatformPostSerializer
+	parser_classes = [MultiPartParser, FormParser]
+
+	def get_queryset(self):
+		return PlatformPost.objects.all()
+
+
+class PlatformPostRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+	serializer_class = PlatformPostSerializer
+	parser_classes = [MultiPartParser, FormParser]
+	queryset = PlatformPost.objects.all()
