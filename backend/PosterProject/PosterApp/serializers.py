@@ -6,25 +6,42 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'userpic']
-
-
-class PostSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Post
-        fields = ['title', 'text', 'media', 'publication_time', 'author', 'platforms']
-
+        fields = ['pk', 'username', 'email', 'userpic']
 
 class PlatformSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Platform
-        fields = ['login', 'password', 'email', 'phone_number', 'platform', 'user']
+        fields = ['pk', 'login', 'password', 'email', 'phone_number', 'platform', 'user']
 
+class PlatformDetailSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = Platform
+        fields = ['pk', 'login', 'password', 'email', 'phone_number', 'platform', 'user']
+
+
+class PostDetailSerializer(serializers.ModelSerializer):
+    author = UserSerializer()
+    platforms = PlatformSerializer(many=True)
+
+    class Meta:
+        model = Post
+        fields = ['pk', 'title', 'text', 'media', 'publication_time', 'author', 'platforms']
+        
+
+class PostSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Post
+        fields = ['pk', 'title', 'text', 'media', 'publication_time', 'author', 'platforms']
 
 class PlatformPostSerializer(serializers.ModelSerializer):
+    platform = PlatformSerializer()
+    post = PostSerializer()
 
     class Meta:
         model = PlatformPost
-        fields = ['post', 'title', 'platform', 'text', 'media', 'publication_time']
+        fields = ['pk', 'post', 'title', 'platform', 'text', 'media', 'publication_time']
+

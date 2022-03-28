@@ -34,7 +34,7 @@ class User(AbstractUser):
 class Post(models.Model):
 	title = models.CharField(max_length=50, blank=True, default='')
 	text = models.TextField()
-	media = models.FileField(null=True, upload_to=post_dir_path)
+	media = models.FileField(null=True, blank=True, upload_to=post_dir_path)
 	#TODO: Реализовать возможность добавления нескольких файлов
 	publication_time = models.DateTimeField(null=True, blank=False)
 	author = models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='author', on_delete=models.CASCADE)
@@ -73,5 +73,5 @@ class PlatformPost(models.Model):
 	title = models.CharField(max_length=50, blank=True, null=True)
 	platform = models.ForeignKey(to=Platform, on_delete=models.CASCADE)
 	text = models.TextField(null=True)
-	media = models.FileField(null=True, upload_to=platform_post_dir_path)
+	media = models.FileField(null=True, blank=True, upload_to=platform_post_dir_path)
 	publication_time = models.DateTimeField(null=True)
