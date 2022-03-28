@@ -25,7 +25,11 @@ SECRET_KEY = 'rgt$d4bha$k_g%w1=jyjtu7ng+gfcl&p^f2t@rs%b4wk-s7kle'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+MIDDLEWARE_CLASSES = (
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.BrokenLinkEmailsMiddleware',
+    'django.middleware.common.CommonMiddleware'
+)
 ALLOWED_HOSTS = []
 
 
@@ -46,6 +50,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -55,6 +60,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'PosterProject.urls'
 
