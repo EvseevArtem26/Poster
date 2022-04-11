@@ -9,17 +9,23 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['pk', 'username', 'email', 'userpic']
 
 class PlatformSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        many=False,
+        read_only=False,
+        slug_field='username',
+        queryset = User.objects.all()
+    )
 
     class Meta:
         model = Platform
-        fields = ['pk', 'login', 'password', 'email', 'phone_number', 'platform', 'user']
+        fields = "__all__"
 
 class PlatformDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
     class Meta:
         model = Platform
-        fields = ['pk', 'login', 'password', 'email', 'phone_number', 'platform', 'user']
+        fields = "__all__"
 
 
 class PostDetailSerializer(serializers.ModelSerializer):
@@ -28,14 +34,20 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['pk', 'title', 'text', 'media', 'publication_time', 'author', 'platforms']
+        fields = "__all__"
         
 
 class PostSerializer(serializers.ModelSerializer):
-    
+    author = serializers.SlugRelatedField(
+        many=False,
+        read_only=False,
+        slug_field='username',
+        queryset = User.objects.all()
+    )
+
     class Meta:
         model = Post
-        fields = ['pk', 'title', 'text', 'media', 'publication_time', 'author', 'platforms']
+        fields = "__all__"
 
 class PlatformPostSerializer(serializers.ModelSerializer):
     platform = PlatformSerializer()
@@ -43,5 +55,5 @@ class PlatformPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PlatformPost
-        fields = ['pk', 'post', 'title', 'platform', 'text', 'media', 'publication_time']
+        fields = "__all__"
 

@@ -31,8 +31,11 @@ class PostListCreateAPIView(generics.ListCreateAPIView):
 		queryset = Post.objects.all()
 		params = self.request.query_params
 		user = params.get('username', None)
+		status = params.get('status', None)
 		if user:
-			queryset = Post.objects.filter(author__username=user)
+			queryset = queryset.filter(author__username=user)
+		if status:
+			queryset = queryset.filter(status=status)
 		return queryset
 
 class PostUpdateAPIView(generics.UpdateAPIView):
@@ -50,10 +53,15 @@ class PostRetrieveDestroyAPIView(generics.RetrieveDestroyAPIView):
 #  Platform views
 
 class PlatformListCreateAPIView(generics.ListCreateAPIView):
-    serializer_class = PlatformSerializer
+	serializer_class = PlatformSerializer
 
-    def get_queryset(self):
-        return Platform.objects.all()
+	def get_queryset(self):
+		queryset = Platform.objects.all()
+		params = self.request.query_params
+		user = params.get('username', None)
+		if user:
+			queryset = Platform.objects.filter(user__username=user)
+		return queryset				
 
 
 class PlatformUpdateAPIView(generics.UpdateAPIView):
