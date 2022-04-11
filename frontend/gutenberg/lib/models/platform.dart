@@ -1,5 +1,5 @@
  class Platform {
-  int? pk;
+  int? id;
   late String login;
   late String password;
   late String email;
@@ -9,7 +9,7 @@
 
   Platform(
     {
-      this.pk,
+      this.id,
       required this.login,
       required this.password,
       required this.email,
@@ -20,7 +20,7 @@
   );
 
   Platform.fromJson(Map<String, dynamic> json) {
-    pk = json['pk'];
+    id = json['id'];
     login = json['login'];
     password = json['password'];
     email = json['email'];
@@ -31,7 +31,7 @@
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['pk'] = pk;
+    data['id'] = id;
     data['login'] = login;
     data['password'] = password;
     data['email'] = email;

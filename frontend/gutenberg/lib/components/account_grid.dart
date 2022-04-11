@@ -42,28 +42,28 @@ class _AccountGridState extends State<AccountGrid> {
                     AccountCard(
                       platform: findByName('FB'),
                       title: 'FB',
-                      onSave: (){
+                      onChanged: (){
                         setState(() {});
                       },
                     ),
                     AccountCard(
                       platform:  findByName('VK'),
                       title: 'VK',
-                      onSave: (){
+                      onChanged: (){
                         setState(() {});
                       },
                     ),
                     AccountCard(
                       platform:  findByName('TW'),
                       title: 'TW',
-                      onSave: (){
+                      onChanged: (){
                         setState(() {});
                       },
                     ),
                     AccountCard(
                       platform: findByName('IG'),
                       title: 'IG',
-                      onSave: (){
+                      onChanged: (){
                         setState(() {});
                       },
                     )
@@ -75,28 +75,28 @@ class _AccountGridState extends State<AccountGrid> {
                     AccountCard(
                       platform: findByName('TT'),
                       title: 'TT',
-                      onSave: (){
+                      onChanged: (){
                         setState(() {});
                       },
                     ),
                     AccountCard(
                       platform: findByName('YT'),
                       title: 'YT',
-                      onSave: (){
+                      onChanged: (){
                         setState(() {});
                       },
                     ),
                     AccountCard(
                       platform:  findByName('TG'),
                       title: 'TG',
-                      onSave: (){
+                      onChanged: (){
                         setState(() {});
                       },
                     ),
                     AccountCard(
                       platform: findByName('OK'),
                       title: 'OK',
-                      onSave: (){
+                      onChanged: (){
                         setState(() {});
                       },
                     )

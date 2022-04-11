@@ -10,13 +10,13 @@ import '../models/platform.dart';
 class AccountCard extends StatefulWidget {
   final Platform? platform;
   final String title;
-  final Function() onSave;
+  final Function() onChanged;
   const AccountCard(
     { 
       Key? key, 
       this.platform, 
       required this.title,
-      required this.onSave,
+      required this.onChanged,
     }
     ) : super(key: key);
   static const Map<String, String> titles = {
@@ -119,6 +119,23 @@ class _AccountCardState extends State<AccountCard> {
                     labelText: 'Phone number',
                   ),
                 ),
+                ElevatedButton(
+                  onPressed: ()async{
+                    await deleteAccount(widget.platform!.id!);
+                    cardKey.currentState?.toggleCard();
+                    loginController.clear();
+                    passwordController.clear();
+                    emailController.clear();
+                    phoneController.clear();
+                    widget.onChanged();
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                    foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                  ),
+                  child: const Text('Delete account'),
+                ),
+                
               ],
             ),
           ),
@@ -199,7 +216,7 @@ class _AccountCardState extends State<AccountCard> {
                   //send data to server
                   saveAccount();
                   cardKey.currentState!.toggleCard();
-                  widget.onSave();
+                  widget.onChanged();
                 },
                 
               ),
@@ -243,6 +260,22 @@ class _AccountCardState extends State<AccountCard> {
     }
     else {
       print('Failed to create account\ncode: ${response.statusCode}');
+      print(response.body);
+    }
+  }
+  Future<void> deleteAccount(int id) async{
+    Uri url = Uri(
+      scheme: 'http',
+      host: 'localhost',
+      port: 8000,
+      path: 'poster/platforms/$id',
+    );
+    http.Response response = await http.delete(url);
+    if(response.statusCode == 204){
+      print('Account deleted');
+    }
+    else {
+      print('Failed to delete account\ncode: ${response.statusCode}');
       print(response.body);
     }
   }
