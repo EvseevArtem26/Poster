@@ -85,6 +85,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                     ),
                     TextFormField(
                       controller: passwordController,
+                      obscureText: true,
                       decoration: InputDecoration(
                         hintText: "Password",
                         hintStyle: GoogleFonts.secularOne(
@@ -170,7 +171,9 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                   fontWeight: FontWeight.w100,
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/registration');
+              },
             ),
           ],
         ),

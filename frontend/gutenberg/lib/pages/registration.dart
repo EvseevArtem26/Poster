@@ -245,7 +245,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 ),
               ),
               onPressed: () {
-                Navigator.pushNamed(context, '/login');
+                Navigator.pushReplacementNamed(context, '/login');
               },
             ),
           ],
@@ -381,11 +381,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
       })
     );
     if(response.statusCode == 201){      
-      Navigator.pushNamed(context, "/login");
+      Navigator.pushReplacementNamed(context, "/login");
       return response.statusCode;
     }
     else {
       print('Failed to create user\ncode: ${response.statusCode}');
+      print(response.body);
       return response.statusCode;
     }
   }
