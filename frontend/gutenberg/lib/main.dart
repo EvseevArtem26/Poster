@@ -3,6 +3,7 @@ import 'pages/registration.dart';
 import 'pages/authorization.dart';
 import 'pages/home.dart';
 import 'pages/new_post.dart';
+import 'pages/drafts.dart';
 
 
 void main() {
@@ -15,18 +16,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: RegistrationPage(),
-      initialRoute: 'registration',
+      initialRoute: '/login',
       routes: {
         // '/': (context) => RegistrationPage(),
         '/login': (context) => AuthorizationPage(),
         '/registration': (context) => RegistrationPage(),
         '/home': (context) => HomePage(),
-        '/newPost': (context) => NewPostPage(),
+        '/add': (context) => NewPostPage(),
+        '/drafts': (context) => DraftsPage(),
       },
     );
   }

@@ -45,6 +45,18 @@ class _NavBarState extends State<NavBar>{
     onTap: (int index){
       setState(() {
         selectedIndex = index;
+        switch(index){
+          case 0:  Navigator.pushReplacementNamed(context, '/home');
+          break;
+          case 1:  Navigator.pushReplacementNamed(context, '/add');
+          break;
+          case 2:  Navigator.pushReplacementNamed(context, '/drafts');
+          break;
+          // case 3:  Navigator.pushReplacementNamed(context, '/delayed');
+          // break;
+          // case 4:  Navigator.pushReplacementNamed(context, '/statistics');
+          // break;
+        }
       });
     },
     );
