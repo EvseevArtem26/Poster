@@ -1,5 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'account_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import '../models/platform.dart';
+
 
 class AccountGrid extends StatefulWidget {
   double width, height;
@@ -10,70 +16,133 @@ class AccountGrid extends StatefulWidget {
 }
 
 class _AccountGridState extends State<AccountGrid> {
-  Map<String, Color> platforms = 
-    {
-      'Facebook': Color.fromARGB(255, 59, 89, 152),
-      'Vkontakte': Color.fromARGB(255, 38, 5, 137),
-      'Twitter': Color.fromARGB(255, 2, 157, 214),
-      'Instagram': Color.fromARGB(247, 224, 221, 14),
-      'TikTok': Color.fromARGB(255, 255, 64, 129),
-      'Youtube': Color.fromARGB(255, 222, 18, 18),
-      'Telegram':  Color.fromARGB(255, 27, 178, 232),
-      'Odnoklassniki': Color.fromARGB(255, 237, 118, 0),
-    };
+  
+  List<Platform?> platforms = [];
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: widget.width,
-      height: widget.height,
-      alignment: Alignment.center,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              AccountCard(
-                platform: 'Facebook',
-                color: platforms['Facebook']!,
-              ),
-              AccountCard(
-                platform: 'Vkontakte',
-                color: platforms['Vkontakte']!,
-              ),
-              AccountCard(
-                platform: 'Twitter',
-                color: platforms['Twitter']!,
-              ),
-              AccountCard(
-                platform: 'Instagram',
-                color: platforms['Instagram']!,
-              )
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              AccountCard(
-                platform: 'TikTok',
-                color: platforms['TikTok']!,
-              ),
-              AccountCard(
-                platform: 'Youtube',
-                color: platforms['Youtube']!,
-              ),
-              AccountCard(
-                platform: 'Telegram',
-                color: platforms['Telegram']!,
-              ),
-              AccountCard(
-                platform: 'Odnoklassniki',
-                color: platforms['Odnoklassniki']!,
-              )
-            ],
-          )
-        ]
-      ),
+    return FutureBuilder(
+      future: getPlatforms(),
+      builder: (BuildContext context, snapshot){
+        if(snapshot.hasData){
+          platforms = snapshot.data as List<Platform?>;
+          while(platforms.length<8){
+            platforms.add(null);
+          }
+          return  Container(
+            width: widget.width,
+            height: widget.height,
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    AccountCard(
+                      platform: findByName('FB'),
+                      title: 'FB',
+                      onSave: (){
+                        setState(() {});
+                      },
+                    ),
+                    AccountCard(
+                      platform:  findByName('VK'),
+                      title: 'VK',
+                      onSave: (){
+                        setState(() {});
+                      },
+                    ),
+                    AccountCard(
+                      platform:  findByName('TW'),
+                      title: 'TW',
+                      onSave: (){
+                        setState(() {});
+                      },
+                    ),
+                    AccountCard(
+                      platform: findByName('IG'),
+                      title: 'IG',
+                      onSave: (){
+                        setState(() {});
+                      },
+                    )
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    AccountCard(
+                      platform: findByName('TT'),
+                      title: 'TT',
+                      onSave: (){
+                        setState(() {});
+                      },
+                    ),
+                    AccountCard(
+                      platform: findByName('YT'),
+                      title: 'YT',
+                      onSave: (){
+                        setState(() {});
+                      },
+                    ),
+                    AccountCard(
+                      platform:  findByName('TG'),
+                      title: 'TG',
+                      onSave: (){
+                        setState(() {});
+                      },
+                    ),
+                    AccountCard(
+                      platform: findByName('OK'),
+                      title: 'OK',
+                      onSave: (){
+                        setState(() {});
+                      },
+                    )
+                  ],
+                )
+              ]
+            ),
+          );
+        }
+        else {
+          return Container(
+            width: widget.width,
+            height: widget.height,
+            alignment: Alignment.center,
+            child: const CircularProgressIndicator(),
+          );
+        }
+      }
     );
   }
+  Future<List<Platform?>> getPlatforms () async {
+     Uri url = Uri(
+      scheme: 'http',
+      host: 'localhost',
+      port: 8000,
+      path: 'poster/platforms/',
+      queryParameters: {
+        'username': (await SharedPreferences.getInstance()).getString('username'),
+      },
+    );
+    http.Response response = await http.get(url);
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      List<Platform?> platforms = [];
+      for (var i = 0; i < data.length; i++) {
+        platforms.add(Platform.fromJson(data[i]));
+      }
+      return platforms;
+    }
+    else {
+      throw Exception('Failed to load platforms');
+    }
+  }
+
+  Platform? findByName (String name){
+    return platforms.singleWhere((element) => element?.platform==name, orElse: ()=>null);
+  }
+  
 }
