@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import '../util/requests.dart';
 import 'account_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -8,8 +9,9 @@ import '../models/platform.dart';
 
 
 class AccountGrid extends StatefulWidget {
-  double width, height;
-  AccountGrid({ Key? key, required this.width, required this.height }) : super(key: key);
+  final double width;
+  final double height;
+  const AccountGrid({ Key? key, required this.width, required this.height }) : super(key: key);
 
   @override
   State<AccountGrid> createState() => _AccountGridState();
@@ -22,10 +24,10 @@ class _AccountGridState extends State<AccountGrid> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: getPlatforms(),
+      future: PlatformService.getPlatforms("draft"),
       builder: (BuildContext context, snapshot){
         if(snapshot.hasData){
-          platforms = snapshot.data as List<Platform?>;
+          platforms = List<Platform?>.from(snapshot.data as List<Platform?>);
           while(platforms.length<8){
             platforms.add(null);
           }
@@ -118,16 +120,24 @@ class _AccountGridState extends State<AccountGrid> {
     );
   }
   Future<List<Platform?>> getPlatforms () async {
+    final prefs = await SharedPreferences.getInstance();
+    String? username = prefs.getString('username');
+    String token = prefs.getString('token') ?? '';
      Uri url = Uri(
       scheme: 'http',
       host: 'localhost',
       port: 8000,
       path: 'poster/platforms/',
       queryParameters: {
-        'username': (await SharedPreferences.getInstance()).getString('username'),
+        'username': username,
       },
     );
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Token $token',
+      },
+    );
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
       List<Platform?> platforms = [];

@@ -1,10 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gutenberg/util/requests.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 import '../models/platform.dart';
 
 class AccountCard extends StatefulWidget {
@@ -121,7 +119,7 @@ class _AccountCardState extends State<AccountCard> {
                 ),
                 ElevatedButton(
                   onPressed: ()async{
-                    await deleteAccount(widget.platform!.id!);
+                    await PlatformService.deletePlatform(widget.platform!.id!);
                     cardKey.currentState?.toggleCard();
                     loginController.clear();
                     passwordController.clear();
@@ -212,9 +210,10 @@ class _AccountCardState extends State<AccountCard> {
               ElevatedButton(
                 child: 
                 const Text('Submit'),
-                onPressed: () {
+                onPressed: () async {
                   //send data to server
-                  saveAccount();
+                  Platform platform = await buildPlatform();
+                  await PlatformService.savePlatform(platform);
                   cardKey.currentState!.toggleCard();
                   widget.onChanged();
                 },
@@ -224,59 +223,23 @@ class _AccountCardState extends State<AccountCard> {
           ),
         ),
       ),
-      // fill: Fill.fillBack,
       direction: FlipDirection.VERTICAL,
     );
     }
   }
 
-  Future<void> saveAccount() async {
-    //save account to server
-    Uri url = Uri(
-      scheme: 'http',
-      host: 'localhost',
-      port: 8000,
-      path: 'poster/platforms/',
-    );
+  Future<Platform> buildPlatform()async{
+    // builds platform object from card state
+    final prefs = await SharedPreferences.getInstance();
+    String username = prefs.getString('username')!;
 
-    http.Response response = await http.post(
-      url,
-      headers: {
-        'Accept': 'application/json',
-        "Content-Type": "application/json",
-      },
-      //get username from shared preferences
-      body: jsonEncode({
-        'user': (await SharedPreferences.getInstance()).getString('username'),
-        'platform': widget.title,
-        'login': loginController.text,
-        'password': passwordController.text,
-        'email': emailController.text,
-        'phone_number': phoneController.text,
-      }),
+    return Platform(
+      platform: widget.title,
+      login: loginController.text,
+      password: passwordController.text,
+      email: emailController.text,
+      phoneNumber: phoneController.text,
+      user: username,
     );
-    if(response.statusCode == 201){      
-      print('Account saved');
-    }
-    else {
-      print('Failed to create account\ncode: ${response.statusCode}');
-      print(response.body);
-    }
-  }
-  Future<void> deleteAccount(int id) async{
-    Uri url = Uri(
-      scheme: 'http',
-      host: 'localhost',
-      port: 8000,
-      path: 'poster/platforms/$id',
-    );
-    http.Response response = await http.delete(url);
-    if(response.statusCode == 204){
-      print('Account deleted');
-    }
-    else {
-      print('Failed to delete account\ncode: ${response.statusCode}');
-      print(response.body);
-    }
   }
 }

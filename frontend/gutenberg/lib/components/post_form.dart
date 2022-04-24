@@ -18,13 +18,14 @@ class _PostFormState extends State<PostForm> {
   late String text;
   late DateTime publicationTime;
   late String author;
-  late List platforms = [];
+  late List<int> platforms = [];
+  List<String> platformsNames = [];
   late String status = 'draft';
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Container(
+      child: SizedBox(
         // decoration: BoxDecoration(
         //   color: Colors.blue[400],
         //   borderRadius: BorderRadius.circular(10),
@@ -54,7 +55,7 @@ class _PostFormState extends State<PostForm> {
                 ),
               ),
               // добавить в черновик
-              Container(
+              SizedBox(
                 height: 50,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -64,9 +65,9 @@ class _PostFormState extends State<PostForm> {
                       onPressed: ()async{
                         status='draft';
                         Post post = await buildPost();
-                        savePost(post);
+                        PostService.savePost(post);
                       },
-                      child: Text("Добавить в черновик")
+                      child: const Text("Добавить в черновик")
                     ),
                     const ElevatedButton(
                       onPressed: null,
@@ -155,11 +156,11 @@ class _PostFormState extends State<PostForm> {
                         okButtonLabel: 'OK',
                         cancelButtonLabel: 'CANCEL',
                         hintWidget: const Text('Please choose one or more'),
-                        initialValue: platforms,
+                        initialValue: platformsNames,
                         onSaved: (value) {
                           if (value == null) return;
                           setState(() {
-                            platforms = value;
+                            platformsNames = value;
                           });
                         },
                       ),
@@ -177,7 +178,6 @@ class _PostFormState extends State<PostForm> {
   }
   Future<Post> buildPost()async{
     final prefs = await SharedPreferences.getInstance();
-    // String token = prefs.getString('token') ?? '';
     String username = prefs.getString('username') ?? '';
     return Post(   
       text: text,
