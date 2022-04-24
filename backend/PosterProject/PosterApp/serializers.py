@@ -20,23 +20,7 @@ class PlatformSerializer(serializers.ModelSerializer):
         model = Platform
         fields = "__all__"
 
-class PlatformDetailSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-
-    class Meta:
-        model = Platform
-        fields = "__all__"
-
-
-class PostDetailSerializer(serializers.ModelSerializer):
-    author = UserSerializer()
-    platforms = PlatformSerializer(many=True)
-
-    class Meta:
-        model = Post
-        fields = "__all__"
         
-
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         many=False,
@@ -50,8 +34,6 @@ class PostSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class PlatformPostSerializer(serializers.ModelSerializer):
-    platform = PlatformSerializer()
-    post = PostSerializer()
 
     class Meta:
         model = PlatformPost
