@@ -1,6 +1,7 @@
 // To parse this JSON data, do
 //
 //     final post = postFromJson(jsonString);
+
 import 'dart:convert';
 
 Post postFromJson(String str) => Post.fromJson(json.decode(str));
@@ -9,35 +10,35 @@ String postToJson(Post data) => json.encode(data.toJson());
 
 class Post {
     Post({
-        this.pk,
+        this.id,
+        required this.author,
         required this.text,
         required this.publicationTime,
-        required this.author,
+        required this.status,
         required this.platforms,
-        required this.status
     });
 
-    int? pk;
+    int? id;
+    String author;
     String text;
     DateTime publicationTime;
-    String author;
-    List<dynamic> platforms;
     String status;
+    List<int> platforms;
 
     factory Post.fromJson(Map<String, dynamic> json) => Post(
-        pk: json["pk"],
+        id: json["id"],
+        author: json["author"],
         text: json["text"],
         publicationTime: DateTime.parse(json["publication_time"]),
-        author: json["author"],
-        platforms: List<dynamic>.from(json["platforms"].map((x) => x)),
-        status: json["status"]
+        status: json["status"],
+        platforms: List<int>.from(json["platforms"].map((x) => x)),
     );
 
-    Map<String, String> toJson() => {
+    Map<String, dynamic> toJson() => {
+        "author": author,
         "text": text,
         "publication_time": publicationTime.toIso8601String(),
-        "author": author,
-        "platforms": List<dynamic>.from(platforms.map((x) => x)).toString(),
-        "status": status
+        "status": status,
+        "platforms": List<dynamic>.from(platforms.map((x) => x)),
     };
 }
