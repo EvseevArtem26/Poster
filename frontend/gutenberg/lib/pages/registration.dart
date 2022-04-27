@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../util/requests.dart';
+import '../util/validators.dart';
 
 
 class RegistrationPage extends StatefulWidget {
+  const RegistrationPage({Key? key}) : super(key: key);
+
   @override
   _RegistrationPageState createState() => _RegistrationPageState();
 }
@@ -180,13 +182,22 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     ),
                     ElevatedButton(
                       onPressed: ()async{
-                        if(validateForm()){
-                          try{
-                          int statusCode = await signUp();
-                          print(statusCode);
-                          }catch(e){
-                            print('Caught error: $e');
+                        if(SignUpValidator.validate(
+                          context,
+                          usernameController.text, 
+                          passwordController.text, 
+                          passwordConfirmController.text,
+                          emailController.text
+                        )){
+                          bool success = await UserService.signUp(
+                            usernameController.text,
+                            passwordController.text,
+                            emailController.text,
+                          );
+                          if(success){
+                            Navigator.pushReplacementNamed(context, "/login");
                           }
+
                         }
                       },
                       style: ButtonStyle(
@@ -252,142 +263,5 @@ class _RegistrationPageState extends State<RegistrationPage> {
         ),
       ),
     );
-  }
-  bool validateForm(){
-    //validate form and register user
-    if(usernameController.text.isEmpty){
-      showDialog(
-        context: context,
-        builder: (BuildContext context){
-          return AlertDialog(
-            title: Text("Error"),
-            content: Text("Please enter your name"),
-            actions: <Widget>[
-              TextButton(
-                child: Text("Close"),
-                onPressed: (){
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        }
-      );
-      return false;
-    }
-    else if(emailController.text.isEmpty){
-      showDialog(
-        context: context,
-        builder: (BuildContext context){
-          return AlertDialog(
-            title: Text("Error"),
-            content: Text("Please enter your email"),
-            actions: <Widget>[
-              TextButton(
-                child: Text("Close"),
-                onPressed: (){
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        }
-      );
-      return false;
-    }
-    else if(passwordController.text.isEmpty){
-      showDialog(
-        context: context,
-        builder: (BuildContext context){
-          return AlertDialog(
-            title: Text("Error"),
-            content: Text("Please enter your password"),
-            actions: <Widget>[
-              TextButton(
-                child: Text("Close"),
-                onPressed: (){
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        }
-      );
-      return false;
-    }
-    else if(passwordConfirmController.text.isEmpty){
-      showDialog(
-        context: context,
-        builder: (BuildContext context){
-          return AlertDialog(
-            title: Text("Error"),
-            content: Text("Please confirm your password"),
-            actions: <Widget>[
-              TextButton(
-                child: Text("Close"),
-                onPressed: (){
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        }
-      );
-      return false;
-    }
-    else if(passwordController.text != passwordConfirmController.text){
-      showDialog(
-        context: context,
-        builder: (BuildContext context){
-          return AlertDialog(
-            title: Text("Error"),
-            content: Text("Password are not the same"),
-            actions: <Widget>[
-              TextButton(
-                child: Text("Close"),
-                onPressed: (){
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        }
-      );
-      return false;
-    }
-    else{
-      return true;
-    }
-      
-
-  }
-  Future<int> signUp()async{
-    Uri url = Uri(
-      scheme: "http",
-      host: "localhost",
-      port: 8000,
-      path: "auth/users/"
-    );
-    http.Response response = await http.post(
-      url,
-      headers: {
-        'Accept': 'application/json',
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "username": usernameController.text,
-        "email": emailController.text,
-        "password": passwordController.text,
-      })
-    );
-    if(response.statusCode == 201){      
-      Navigator.pushReplacementNamed(context, "/login");
-      return response.statusCode;
-    }
-    else {
-      print('Failed to create user\ncode: ${response.statusCode}');
-      print(response.body);
-      return response.statusCode;
-    }
   }
 }
