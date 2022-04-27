@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:date_time_picker/date_time_picker.dart';
-import 'package:multiselect_formfield/multiselect_formfield.dart';
+import 'package:gutenberg/components/platform_picker.dart';
+import 'package:gutenberg/models/platform_post.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import  '../models/post.dart';
+import '../models/platform.dart';
+import '../models/platform_post.dart';
 import '../util/requests.dart';
+import 'platform_chip.dart';
+import 'platform_picker.dart';
 
 
 class PostForm extends StatefulWidget {
@@ -18,8 +23,7 @@ class _PostFormState extends State<PostForm> {
   late String text;
   late DateTime publicationTime;
   late String author;
-  late List<int> platforms = [];
-  List<String> platformsNames = [];
+  List<Platform> selectedPlatforms = [];
   late String status = 'draft';
 
   @override
@@ -41,7 +45,7 @@ class _PostFormState extends State<PostForm> {
                 width: 900,
                 height: 400,
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
+                  // color: Colors.grey[200],
 
                 ),
                 child: TextField(
@@ -65,7 +69,13 @@ class _PostFormState extends State<PostForm> {
                       onPressed: ()async{
                         status='draft';
                         Post post = await buildPost();
-                        PostService.savePost(post);
+                        await PostService.savePost(post);
+                        // print(post.id);
+                        List<PlatformPost> platformPosts = buildPlatformPosts(post, selectedPlatforms);
+                        for(PlatformPost platformPost in platformPosts){
+                          platformPost.post=post.id!;
+                          PlatformPostService.savePlatformPost(platformPost);
+                        }
                       },
                       child: const Text("Добавить в черновик")
                     ),
@@ -113,61 +123,16 @@ class _PostFormState extends State<PostForm> {
                     const Spacer(),
                     Flexible(
                       flex: 2,
-                      child: MultiSelectFormField(
-                        title: const Text("Опубликовать в:"),
-                        validator: (value) {
-                          if (value == null || value.length == 0) {
-                            return 'Please select one or more options';
-                          }
-                          return null;
-                        },
-                        dataSource: const [
-                          {
-                            "display": "Twitter",
-                            "value": "Twitter",
-                          },
-                          {
-                            "display": "Facebook",
-                            "value": "Facebook",
-                          },
-                          {
-                            "display": "Vkontakte",
-                            "value": "Vkontakte",
-                          },
-                          {
-                            "display": "Instagram",
-                            "value": "Instagram",
-                          },
-                          {
-                            "display": "Youtube",
-                            "value": "Youtube",
-                          },
-                          {
-                            "display": "Tiktok",
-                            "value": "Tiktok",
-                          },
-                          {
-                            "display": "Odnoklassniki",
-                            "value": "Odnoklassniki",
-                          },
-                        ],
-                        textField: 'display',
-                        valueField: 'value',
-                        okButtonLabel: 'OK',
-                        cancelButtonLabel: 'CANCEL',
-                        hintWidget: const Text('Please choose one or more'),
-                        initialValue: platformsNames,
-                        onSaved: (value) {
-                          if (value == null) return;
+                      child: PlatformPicker(
+                        onPlatformSelected: (List<Platform> platforms){
                           setState(() {
-                            platformsNames = value;
+                            selectedPlatforms = platforms;
                           });
                         },
-                      ),
+                      )
                     ),
-                    const Spacer(),
+                    const Spacer()
                   ],
-                  
                 ),
               )
             ]
@@ -183,8 +148,19 @@ class _PostFormState extends State<PostForm> {
       text: text,
       publicationTime: publicationTime,
       author: username,
-      platforms: platforms,
+      platforms: [],
       status: status,
     );
+  }
+
+  List<PlatformPost> buildPlatformPosts(Post basePost, List<Platform> platforms){
+    List<PlatformPost> platformPosts = [];
+    for(Platform platform in platforms){
+      platformPosts.add(PlatformPost.fromPost(
+        basePost,
+        platform.id!,
+      ));
+    }
+    return platformPosts;
   }
 }

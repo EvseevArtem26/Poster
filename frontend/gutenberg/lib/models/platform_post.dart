@@ -3,6 +3,7 @@
 //     final platformPost = platformPostFromJson(jsonString);
 
 import 'dart:convert';
+import 'post.dart';
 
 PlatformPost platformPostFromJson(String str) => PlatformPost.fromJson(json.decode(str));
 
@@ -24,6 +25,14 @@ class PlatformPost {
     String? status;
     int post;
     int platform;
+
+    PlatformPost.fromPost(Post post, int platform) : this(
+        text: post.text,
+        publicationTime: post.publicationTime,
+        status: post.status,
+        post: post.id!,
+        platform: platform,
+    );
 
     factory PlatformPost.fromJson(Map<String, dynamic> json) => PlatformPost(
         id: json["id"],

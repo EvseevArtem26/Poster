@@ -81,9 +81,12 @@ class PostService {
       }
     );
     if(response.statusCode != 201){
-        print('Failed to create post\ncode: ${response.statusCode}');
-        print(response.body);
-      }
+      print('Failed to create post\ncode: ${response.statusCode}');
+      print(response.body);
+    }
+    else {
+      post.id = jsonDecode(response.body)['id'];
+    }
   }
 
   static Future<void> updatePost(Post post) async {
@@ -136,7 +139,7 @@ class PostService {
 }
 
 class PlatformService {
-  static Future<List<Platform>> getPlatforms (String status) async {
+  static Future<List<Platform>> getPlatforms () async {
     final prefs = await SharedPreferences.getInstance();
     String? username = prefs.getString('username');
     String token = prefs.getString('token') ?? '';
@@ -145,7 +148,7 @@ class PlatformService {
       host: 'localhost',
       port: 8000,
       path: 'poster/platforms/',
-      query: 'username=$username&status=$status',
+      query: 'username=$username',
     );
     http.Response response = await http.get(
       url,
