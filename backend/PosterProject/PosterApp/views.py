@@ -4,6 +4,9 @@ from rest_framework import authentication
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.response import Response
+from rest_framework import status
+from .api_calls import log_post, send_post
 
 
 # User viewset
@@ -22,7 +25,7 @@ class UserViewSet(ModelViewSet):
 
 class PostViewSet(ModelViewSet):
 	serializer_class = PostSerializer
-	parser_classes = [MultiPartParser, FormParser]
+	parser_classes = [MultiPartParser, FormParser, JSONParser]
 	authentication_classes = [authentication.TokenAuthentication]
 	permission_classes = [IsAuthenticated]
 
@@ -58,7 +61,7 @@ class PlatformViewSet(ModelViewSet):
 
 class PlatformPostViewSet(ModelViewSet):
 	serializer_class = PlatformPostSerializer
-	parser_classes = [MultiPartParser, FormParser]
+	parser_classes = [MultiPartParser, FormParser, JSONParser]
 	queryset = PlatformPost.objects.all()
 	authentication_classes = [authentication.TokenAuthentication]
 	permission_classes = [IsAuthenticated]
@@ -70,3 +73,12 @@ class PlatformPostViewSet(ModelViewSet):
 		if user:
 			queryset = PlatformPost.objects.filter(platform__user__username=user)
 		return queryset
+
+	def create(self, request, *args, **kwargs):
+		serializer = PlatformPostSerializer(data=request.data)
+		if serializer.is_valid():
+			serializer.save()
+			# log_post(serializer.instance)
+			send_post(serializer.instance)
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

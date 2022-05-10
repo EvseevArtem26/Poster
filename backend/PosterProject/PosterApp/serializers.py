@@ -29,6 +29,12 @@ class PostSerializer(serializers.ModelSerializer):
         queryset = User.objects.all()
     )
 
+    platforms = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field='platform',
+    )
+
     class Meta:
         model = Post
         fields = "__all__"

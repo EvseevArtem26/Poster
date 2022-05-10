@@ -40,6 +40,7 @@ class Post(models.Model):
 	#TODO: Создать дополнительное поле/таблицу для разделения опубликованных постов и черновиков
 	platforms = models.ManyToManyField(to='Platform', through='PlatformPost')
 	STATUS_CHOICES = (
+		('waiting', 'Waiting'),
 		('draft', 'Draft'),
 		('published', 'Published'),
 		('delayed', 'Delayed'),
@@ -77,6 +78,7 @@ class PlatformPost(models.Model):
 	media = models.FileField(null=True, blank=True, upload_to=platform_post_dir_path)
 	publication_time = models.DateTimeField(null=True)
 	STATUS_CHOICES = (
+		('waiting', 'Waiting'),
 		('draft', 'Draft'),
 		('published', 'Published'),
 		('delayed', 'Delayed'),
