@@ -39,10 +39,17 @@ def initialize_driver():
     options.add_argument('--ignore-ssl-errors')
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
     options.add_argument('--headless')
+    options.add_extension(r'C:\Users\Luzif\AppData\Local\Google\Chrome\User Data\Default\Extensions\omghfjlpggmjjaagoclmmobgdodcjboh/3.50.0_0.crx')
     # options.add_argument(f"--proxy-server={proxy_url}")
     driver  = webdriver.Chrome(options=options, desired_capabilities=capabilities)
 
     return driver
+
+
+def activate_vpn(driver):
+    driver.get("chrome-extension://omghfjlpggmjjaagoclmmobgdodcjboh/popup/popup.html")
+    time.sleep(3)
+    driver.execute_script("document.querySelector('div.MainContainer page-switch').shadowRoot.querySelector('div.In main-index').shadowRoot.querySelector('div.Foot c-switch').click()")
 
 
 def log_post(post):
