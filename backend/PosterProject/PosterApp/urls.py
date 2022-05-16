@@ -12,5 +12,6 @@ urlpatterns = [
     path('platforms/', PlatformViewSet.as_view({'get': 'list', 'post': 'create'})),
     path('platforms/<int:pk>/', PlatformViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
     path('platform-posts/', PlatformPostViewSet.as_view({'get': 'list', 'post': 'create'})),
-    path('platform-posts/<int:pk>', PlatformPostViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}))
+    path('platform-posts/<int:pk>', PlatformPostViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
+    path('posts/experimental/', MultiPostListCreateView.as_view()),
 ]

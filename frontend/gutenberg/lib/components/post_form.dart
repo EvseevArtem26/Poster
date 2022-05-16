@@ -7,7 +7,6 @@ import  '../models/post.dart';
 import '../models/platform.dart';
 import '../models/platform_post.dart';
 import '../util/requests.dart';
-import 'platform_chip.dart';
 import 'platform_picker.dart';
 
 
@@ -44,7 +43,7 @@ class _PostFormState extends State<PostForm> {
               Container(
                 width: 900,
                 height: 400,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   // color: Colors.grey[200],
 
                 ),
@@ -66,16 +65,17 @@ class _PostFormState extends State<PostForm> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     ElevatedButton(
+                      //TODO: блокировка кнопки после нажатия
                       onPressed: ()async{
                         status='draft';
-                        Post post = await buildPost();
+                        Post post = await makePost(selectedPlatforms);
                         await PostService.savePost(post);
-                        // print(post.id);
-                        List<PlatformPost> platformPosts = buildPlatformPosts(post, selectedPlatforms);
-                        for(PlatformPost platformPost in platformPosts){
-                          platformPost.post=post.id!;
-                          PlatformPostService.savePlatformPost(platformPost);
-                        }
+                        // // print(post.id);
+                        // List<PlatformPost> platformPosts = buildPlatformPosts(post, selectedPlatforms);
+                        // for(PlatformPost platformPost in platformPosts){
+                        //   platformPost.post=post.id!;
+                        //   PlatformPostService.savePlatformPost(platformPost);
+                        // }
                       },
                       child: const Text("Добавить в черновик")
                     ),
@@ -162,5 +162,17 @@ class _PostFormState extends State<PostForm> {
       ));
     }
     return platformPosts;
+  }
+  Future<Post> makePost(List<Platform> platforms)async{
+    final prefs = await SharedPreferences.getInstance();
+    String username = prefs.getString('username') ?? '';
+    return Post.generic(
+      text: text,
+      publicationTime: publicationTime,
+      author: username,
+      status: status,
+      platforms: platforms,
+    );
+
   }
 }

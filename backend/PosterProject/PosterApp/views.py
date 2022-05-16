@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from .api_calls import log_post, send_post
+from .api_calls import log_post, send_post, send_post_experimental
 
 
 # User viewset
@@ -80,5 +80,32 @@ class PlatformPostViewSet(ModelViewSet):
 			serializer.save()
 			# log_post(serializer.instance)
 			send_post(serializer.instance)
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MultiPostListCreateView(generics.ListCreateAPIView):
+	serializer_class = MultiPostSerializer
+	parser_classes = [MultiPartParser, FormParser, JSONParser]
+	authentication_classes = [authentication.TokenAuthentication]
+	permission_classes = [IsAuthenticated]
+	
+	def get_queryset(self):
+		queryset = Post.objects.all()
+		params = self.request.query_params
+		user = params.get('username', None)
+		status = params.get('status', None)
+		if user:
+			queryset = queryset.filter(author__username=user)
+		if status:
+			queryset = queryset.filter(status=status)
+		return queryset
+
+
+	def create(self, request, *args, **kwargs):
+		serializer = MultiPostSerializer(data=request.data)
+		if serializer.is_valid():
+			serializer.save()
+			send_post_experimental(serializer.instance)
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

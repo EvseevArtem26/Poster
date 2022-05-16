@@ -23,7 +23,7 @@ class PlatformPost {
     String? text;
     DateTime? publicationTime;
     String? status;
-    int post;
+    int? post;
     int platform;
 
     PlatformPost.fromPost(Post post, int platform) : this(

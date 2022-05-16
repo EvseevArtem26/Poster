@@ -1,10 +1,11 @@
-from lib2to3.pgen2 import driver
 from multiprocessing.sharedctypes import Value
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.proxy import *
 from selenium.webdriver.common.keys import Keys
+from concurrent import futures
 import time
+from .models import PlatformPost
 
 
 # decorator for measuring elapsed time
@@ -40,7 +41,9 @@ def initialize_driver():
     options.add_argument('--headless')
     # options.add_argument(f"--proxy-server={proxy_url}")
     driver  = webdriver.Chrome(options=options, desired_capabilities=capabilities)
+
     return driver
+
 
 def log_post(post):
     # log post to text file
@@ -106,3 +109,19 @@ def send_post_to_vkontakte(driver, post):
     time.sleep(2)
     driver.find_element(by=By.XPATH, value="//*[@id='send_post']").click()
     time.sleep(3)
+
+
+@time_this
+def send_post_experimental(post):
+    platform_posts = PlatformPost.objects.filter(post=post)
+    with futures.ThreadPoolExecutor() as executor:
+        executor.map(send_post_to_platform, platform_posts)
+
+@time_this
+def send_post_to_platform(platform_post):
+    driver = initialize_driver()
+    if platform_post.platform.platform == 'OK':
+        send_post_to_odnoklassniki(driver, platform_post)
+    if platform_post.platform.platform == 'VK':
+        send_post_to_vkontakte(driver, platform_post)
+    driver.quit()

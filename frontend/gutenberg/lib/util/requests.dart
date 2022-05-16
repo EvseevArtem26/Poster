@@ -18,7 +18,7 @@ class PostService {
       scheme: "http",
       host: "localhost",
       port: 8000,
-      path: "/poster/posts/",
+      path: "/poster/posts/experimental",
       query: "username=$username&status=$status",
     );
     http.Response response = await http.get(
@@ -68,7 +68,7 @@ class PostService {
       scheme: "http",
       host: "localhost",
       port: 8000,
-      path: "/poster/posts/"
+      path: "/poster/posts/experimental/",
     );
     String json = jsonEncode(post.toJson());
     var response = await http.post(
@@ -80,12 +80,11 @@ class PostService {
         "Authorization": "Token $token"
       }
     );
-    if(response.statusCode != 201){
-      print('Failed to create post\ncode: ${response.statusCode}');
-      print(response.body);
+    if(response.statusCode == 201){
+      post.id = jsonDecode(response.body)['id'];
     }
     else {
-      post.id = jsonDecode(response.body)['id'];
+      throw Exception('Failed to create post\ncode: ${response.statusCode}');
     }
   }
 
@@ -110,8 +109,7 @@ class PostService {
       }
     );
     if(response.statusCode != 200){
-        print('Failed to update post\ncode: ${response.statusCode}');
-        print(response.body);
+        throw Exception('Failed to update post\ncode: ${response.statusCode}');
       }
   }
 
@@ -132,8 +130,7 @@ class PostService {
       },
     );
     if(response.statusCode != 204){
-        print('Failed to delete post\ncode: ${response.statusCode}');
-        print(response.body);
+        throw Exception('Failed to delete post\ncode: ${response.statusCode}');
       }
   }
 }
@@ -213,8 +210,7 @@ class PlatformService {
       body: jsonEncode(platform)
     );
     if(response.statusCode != 201){
-      print('Failed to create account\ncode: ${response.statusCode}');
-      print(response.body);
+      throw Exception('Failed to create account\ncode: ${response.statusCode}');
     }
   }
 
@@ -238,8 +234,7 @@ class PlatformService {
       body: jsonEncode(platform)
     );
     if(response.statusCode != 200){
-      print('Failed to update account\ncode: ${response.statusCode}');
-      print(response.body);
+      throw Exception('Failed to update account\ncode: ${response.statusCode}');
     }
   }
 
@@ -260,8 +255,7 @@ class PlatformService {
       },
     );
     if(response.statusCode != 204){
-      print('Failed to delete platform\ncode: ${response.statusCode}');
-      print(response.body);
+      throw Exception('Failed to delete platform\ncode: ${response.statusCode}');
     }
   }
 }
@@ -340,8 +334,7 @@ class PlatformPostService {
       body: jsonEncode(platformPost)
     );
     if(response.statusCode != 201){
-      print('Failed to create platform post\ncode: ${response.statusCode}');
-      print(response.body);
+      throw Exception('Failed to create platform post\ncode: ${response.statusCode}');
     }
   }
 
@@ -365,8 +358,7 @@ class PlatformPostService {
       body: jsonEncode(platformPost)
     );
     if(response.statusCode != 200){
-      print('Failed to update platform post\ncode: ${response.statusCode}');
-      print(response.body);
+      throw Exception('Failed to update platform post\ncode: ${response.statusCode}');
     }
   }
 
@@ -387,8 +379,7 @@ class PlatformPostService {
       },
     );
     if(response.statusCode != 204){
-      print('Failed to delete platform post\ncode: ${response.statusCode}');
-      print(response.body);
+      throw Exception('Failed to delete platform post\ncode: ${response.statusCode}');
     }
   }
 }
