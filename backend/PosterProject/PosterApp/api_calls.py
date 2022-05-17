@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.proxy import *
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 from concurrent import futures
 import time
 from .models import PlatformPost
@@ -19,9 +20,8 @@ def time_this(func):
     return wrapper
 
 
-def initialize_driver():
+def initialize_driver(headless=True):
     # TODO: run driver in another process
-    # TODO: add proxy
 
     PROXY = "195.181.174.139:3128"
     proxy_url = "72.221.196.157:35904"
@@ -38,7 +38,10 @@ def initialize_driver():
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--ignore-ssl-errors')
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    options.add_argument('--headless')
+    if headless:
+        options.add_argument('--headless')
+    # options.add_argument('--disable-gpu')
+    # options.add_argument('window-size=1920x1080')
     options.add_extension(r'C:\Users\Luzif\AppData\Local\Google\Chrome\User Data\Default\Extensions\omghfjlpggmjjaagoclmmobgdodcjboh/3.50.0_0.crx')
     # options.add_argument(f"--proxy-server={proxy_url}")
     driver  = webdriver.Chrome(options=options, desired_capabilities=capabilities)
@@ -48,8 +51,9 @@ def initialize_driver():
 
 def activate_vpn(driver):
     driver.get("chrome-extension://omghfjlpggmjjaagoclmmobgdodcjboh/popup/popup.html")
-    time.sleep(3)
+    time.sleep(5)
     driver.execute_script("document.querySelector('div.MainContainer page-switch').shadowRoot.querySelector('div.In main-index').shadowRoot.querySelector('div.Foot c-switch').click()")
+    time.sleep(2)
 
 
 def log_post(post):
@@ -92,7 +96,6 @@ def send_post_to_odnoklassniki(driver, post):
     input.send_keys(post.text)
     time.sleep(3)
     driver.find_element(by=By.XPATH, value="//*[@class='posting_f_ac']/div[2]").click()
-    time.sleep(4)
 
 
 @time_this
@@ -113,22 +116,62 @@ def send_post_to_vkontakte(driver, post):
     time.sleep(5)
     input = driver.find_element(by=By.XPATH, value="//*[@id='post_field']")
     input.send_keys(post.text)
-    time.sleep(2)
-    driver.find_element(by=By.XPATH, value="//*[@id='send_post']").click()
-    time.sleep(3)
+    action = ActionChains(driver)
+    action.key_down(Keys.CONTROL)
+    action.send_keys(Keys.ENTER)
+    action.key_up(Keys.CONTROL)
+    action.perform()
+    time.sleep(1)
 
+
+@time_this
+def send_post_to_twitter(driver, post):
+    activate_vpn(driver)
+    email = post.platform.email
+    password = post.platform.password
+    driver.get('https://twitter.com/i/flow/login')
+    time.sleep(10)
+    login_field = driver.find_element(by=By.XPATH, value="//*[@id='react-root']/div/div/div/div/div/div/div/div/div/div[2]/div[2]/div/div/div[2]/div[2]/div/div/div/div[5]/label/div/div[2]/div/input")
+    time.sleep(1)
+    login_field.send_keys(email)
+    login_field.send_keys(Keys.ENTER)
+    time.sleep(5)
+    password_field = driver.find_element(by=By.NAME, value="password")
+    time.sleep(1)
+    password_field.send_keys(password)
+    password_field.send_keys(Keys.ENTER)
+    time.sleep(5)
+    driver.get('https://twitter.com/compose/tweet')
+    time.sleep(7)
+    input_field = driver.find_element(by=By.XPATH, value="//*[@class='DraftEditor-editorContainer']/div")
+    time.sleep(5)
+    input_field.send_keys(post.text)
+    action = ActionChains(driver)
+    action.key_down(Keys.CONTROL)
+    action.send_keys(Keys.ENTER)
+    action.key_up(Keys.CONTROL)
+    action.perform()
+    # button = driver.find_element(by=By.XPATH, value="//*[@data-testid='tweetButton']")
+    time.sleep(5)
+    # button.click()
 
 @time_this
 def send_post_experimental(post):
     platform_posts = PlatformPost.objects.filter(post=post)
     with futures.ThreadPoolExecutor() as executor:
         executor.map(send_post_to_platform, platform_posts)
+    # for platform_post in platform_posts:
+        # send_post_to_platform(platform_post)
 
 @time_this
 def send_post_to_platform(platform_post):
-    driver = initialize_driver()
+    # headless = platform_post.platform.platform != 'TW'
+    headless = False
+    driver = initialize_driver(headless=headless)
     if platform_post.platform.platform == 'OK':
         send_post_to_odnoklassniki(driver, platform_post)
     if platform_post.platform.platform == 'VK':
         send_post_to_vkontakte(driver, platform_post)
+    if platform_post.platform.platform == 'TW':
+        send_post_to_twitter(driver, platform_post)
     driver.quit()
