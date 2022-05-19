@@ -75,10 +75,12 @@ class PlatformPostViewSet(ModelViewSet):
 		return queryset
 
 	def create(self, request, *args, **kwargs):
-		serializer = PlatformPostSerializer(data=request.data)
+		data = request.data
+		data['media'] = request.FILES['media']
+		serializer = PlatformPostSerializer(data=data)
 		if serializer.is_valid():
+			# serializer.validated_data['media'] = request.FILES['media']
 			serializer.save()
-			# log_post(serializer.instance)
 			send_post(serializer.instance)
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

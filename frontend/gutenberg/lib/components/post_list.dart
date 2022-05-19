@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/post.dart';
-import '../models/platform_post.dart';
 import 'draft.dart';
 
 class PostList extends StatelessWidget {
@@ -17,7 +16,7 @@ class PostList extends StatelessWidget {
         return Draft(
           text: posts[index].text,
           time: posts[index].publicationTime,
-          platforms: posts[index].platforms.map((PlatformPost platform) => platform.platform).toList(),
+          platforms: posts[index].platforms,
         );
       },
       separatorBuilder: (context, index)=>const SizedBox(height: 20)

@@ -3,6 +3,8 @@
 //     final platformPost = platformPostFromJson(jsonString);
 
 import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
+
 import 'post.dart';
 
 PlatformPost platformPostFromJson(String str) => PlatformPost.fromJson(json.decode(str));
@@ -17,6 +19,7 @@ class PlatformPost {
         this.status,
         required this.post,
         required this.platform,
+        this.media,
     });
 
     int? id;
@@ -24,6 +27,7 @@ class PlatformPost {
     DateTime? publicationTime;
     String? status;
     int? post;
+    XFile? media;
     int platform;
 
     PlatformPost.fromPost(Post post, int platform) : this(
@@ -43,12 +47,12 @@ class PlatformPost {
         platform: json["platform"],
     );
 
-    Map<String, dynamic> toJson() => {
-        "id": id,
-        "text": text,
-        "publication_time": publicationTime?.toIso8601String(),
-        "status": status,
-        "post": post,
-        "platform": platform,
+    Map<String, String> toJson() => {
+        "id": id.toString(),
+        "text": text!,
+        "publication_time": publicationTime!.toIso8601String(),
+        "status": status!,
+        "post": post.toString(),
+        "platform": platform.toString(),
     };
 }

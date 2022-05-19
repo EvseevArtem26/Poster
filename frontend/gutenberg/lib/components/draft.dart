@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class Draft extends StatelessWidget {
   final String text;
   final DateTime? time;
-  final List<int> platforms;
+  final List<String> platforms;
   const Draft({ 
     Key? key, 
     required this.text, 
@@ -26,7 +26,6 @@ class Draft extends StatelessWidget {
       child: SizedBox(
         width: double.infinity,
         height: 400,
-        // padding: const EdgeInsets.all(10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,7 +49,6 @@ class Draft extends StatelessWidget {
                 ),
               ),
             ),
-            // const Spacer(flex: 1),
             Expanded(
               flex: 2,
               child: Container(
@@ -85,7 +83,7 @@ class Draft extends StatelessWidget {
                         children: platforms.map((platform) {
                           return Chip(
                             label: Text(
-                              "$platform",
+                              platform,
                               style: Theme.of(context).textTheme.bodyText2?.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
                               ),

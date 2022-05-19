@@ -1,4 +1,6 @@
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/platform.dart';
@@ -6,6 +8,13 @@ import '../models/platform_post.dart';
 import '../models/post.dart';
 import '../models/user.dart';
 
+
+Future<List<int>> getImageBytes(XFile file)async{
+  //returns bytes of image
+  Uint8List data = await file.readAsBytes();
+  List<int> imageBytes = data.cast();
+  return imageBytes;
+}
 
 class PostService {
 
@@ -18,7 +27,7 @@ class PostService {
       scheme: "http",
       host: "localhost",
       port: 8000,
-      path: "/poster/posts/experimental",
+      path: "/poster/posts/",
       query: "username=$username&status=$status",
     );
     http.Response response = await http.get(
@@ -68,20 +77,33 @@ class PostService {
       scheme: "http",
       host: "localhost",
       port: 8000,
-      path: "/poster/posts/experimental/",
+      path: "/poster/posts/",
     );
-    String json = jsonEncode(post.toJson());
-    var response = await http.post(
-      url, 
-      body: json,
-      headers: {
-        "content-type": "application/json",
-        "accept": "application/json",
-        "Authorization": "Token $token"
-      }
-    );
+
+    http.MultipartRequest request = http.MultipartRequest("POST", url,);
+    request.headers['Authorization'] = "Token $token";
+    request.headers['content-type'] = "multipart/form-data";
+    request.headers['accept'] = "application/json";
+
+    request.fields['text'] = post.text;
+    request.fields['publication_time'] = post.publicationTime.toIso8601String();
+    request.fields['author'] = post.author;
+    request.fields['status'] = post.status;
+    if(post.media != null){
+      List<int> bytes = await getImageBytes(post.media!);
+      request.files.add(http.MultipartFile.fromBytes(
+        'media',
+        bytes,
+        filename: post.media!.name,
+      ));
+    }
+    var response = await request.send();
     if(response.statusCode == 201){
-      post.id = jsonDecode(response.body)['id'];
+      //TODO: обработать ответ от сервера
+      // response.stream.bytesToString().asStream().listen((event) {
+      // Map<String, dynamic> json = jsonDecode(event);
+      // post.id = json['id'];
+    // });
     }
     else {
       throw Exception('Failed to create post\ncode: ${response.statusCode}');

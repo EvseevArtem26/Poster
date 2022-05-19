@@ -20,7 +20,7 @@ def time_this(func):
     return wrapper
 
 
-def initialize_driver(headless=True):
+def initialize_driver(headless=True, vpn=False):
     # TODO: run driver in another process
 
     PROXY = "195.181.174.139:3128"
@@ -42,7 +42,8 @@ def initialize_driver(headless=True):
         options.add_argument('--headless')
     # options.add_argument('--disable-gpu')
     # options.add_argument('window-size=1920x1080')
-    options.add_extension(r'C:\Users\Luzif\AppData\Local\Google\Chrome\User Data\Default\Extensions\omghfjlpggmjjaagoclmmobgdodcjboh/3.50.0_0.crx')
+    if vpn:
+        options.add_extension(r'C:\Users\Luzif\AppData\Local\Google\Chrome\User Data\Default\Extensions\omghfjlpggmjjaagoclmmobgdodcjboh/3.50.0_0.crx')
     # options.add_argument(f"--proxy-server={proxy_url}")
     driver  = webdriver.Chrome(options=options, desired_capabilities=capabilities)
 
@@ -68,13 +69,19 @@ def log_post(post):
 @time_this
 def send_post(post):
     # send post to platform
-    driver = initialize_driver()
     if post.platform.platform == 'OK':
+        driver = initialize_driver()
         send_post_to_odnoklassniki(driver, post)
+        driver.quit()
     if post.platform.platform == 'VK':
+        driver = initialize_driver()
         send_post_to_vkontakte(driver, post)
+        driver.quit()
+    if post.platform.platform == 'TW':
+        driver = initialize_driver(headless=False, vpn=True)
+        send_post_to_twitter(driver, post)
+        driver.quit()
 
-    driver.quit()
 
 @time_this
 def send_post_to_odnoklassniki(driver, post):
@@ -142,7 +149,7 @@ def send_post_to_twitter(driver, post):
     password_field.send_keys(Keys.ENTER)
     time.sleep(5)
     driver.get('https://twitter.com/compose/tweet')
-    time.sleep(7)
+    time.sleep(10)
     input_field = driver.find_element(by=By.XPATH, value="//*[@class='DraftEditor-editorContainer']/div")
     time.sleep(5)
     input_field.send_keys(post.text)

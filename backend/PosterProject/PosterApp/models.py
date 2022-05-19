@@ -9,16 +9,9 @@ from django.conf import settings
 def user_dir_path(instance, filename):
 	return f"users/{instance.username}/{filename}"
 
-def post_dir_path(instance,filename):
-	user = instance.author
-	return f"users/{user.username}/posts/{instance.title}/{filename}"
 
-def platform_post_dir_path(instance,filename):
-	post = instance.post
-	user = post.author
-	platform = instance.platform
-	title = instance.title if instance.title else post.title
-	return f"users/{user.username}/posts/{platform.platform}/{title}/{filename}"
+
+
 
 class User(AbstractUser):
 	username = models.CharField(max_length=45, unique=True)
@@ -32,8 +25,14 @@ class User(AbstractUser):
 
 
 class Post(models.Model):
+	def media_path(instance,filename):
+		pk = instance.pk or ''
+		user = instance.author
+		return fr"users/{user.username}/posts/{pk}/{filename}"
+
+
 	text = models.TextField()
-	media = models.FileField(null=True, blank=True, upload_to=post_dir_path)
+	media = models.FileField(null=True, blank=True, upload_to=media_path)
 	#TODO: Реализовать возможность добавления нескольких файлов
 	publication_time = models.DateTimeField(null=True, blank=False)
 	author = models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='author', on_delete=models.CASCADE)
@@ -46,6 +45,30 @@ class Post(models.Model):
 		('delayed', 'Delayed'),
 	)
 	status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
+
+	def save( self, *args, **kwargs ):
+	# Call save first, to create a primary key
+		super().save( *args, **kwargs )
+
+		media = self.media
+		if media:
+			# Create new filename, using primary key and file extension
+			oldfile = self.media.name
+			last_slash = oldfile.rfind( '/' )
+			newfile = self.media_path(oldfile[last_slash:])
+
+			# Create new file and remove old one
+			if newfile != oldfile:
+				self.media.storage.delete( newfile )
+				savedfile = self.media.storage.save( newfile, media )
+				self.media.name = savedfile
+				self.media.close()
+				self.media.storage.delete( oldfile )
+				# Save again to keep changes
+				kwargs['force_insert'] = False
+				kwargs['force_update'] = True
+				kwargs['update_fields'] = ['media']
+				super().save( *args, **kwargs )
 
 
 class Platform(models.Model):
@@ -72,10 +95,16 @@ class Platform(models.Model):
 
 
 class PlatformPost(models.Model):
+	def media_path(instance,filename):
+		post = instance.post
+		user = post.author
+		platform = instance.platform
+		return f"users/{user.username}/posts/{post.pk}/{platform.platform}/{filename}"
+
 	post = models.ForeignKey(to=Post, on_delete=models.CASCADE)
 	platform = models.ForeignKey(to=Platform, on_delete=models.CASCADE)
 	text = models.TextField(null=True)
-	media = models.FileField(null=True, blank=True, upload_to=platform_post_dir_path)
+	media = models.FileField(null=True, blank=True, upload_to=media_path)
 	publication_time = models.DateTimeField(null=True)
 	STATUS_CHOICES = (
 		('waiting', 'Waiting'),

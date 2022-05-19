@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:gutenberg/components/platform_picker.dart';
 import 'package:gutenberg/models/platform_post.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import  '../models/post.dart';
 import '../models/platform.dart';
 import '../models/platform_post.dart';
 import '../util/requests.dart';
 import 'platform_picker.dart';
+import 'file_picker.dart';
 
 
 class PostForm extends StatefulWidget {
@@ -24,29 +26,21 @@ class _PostFormState extends State<PostForm> {
   late String author;
   List<Platform> selectedPlatforms = [];
   late String status = 'draft';
+  late XFile? image;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: SizedBox(
-        // decoration: BoxDecoration(
-        //   color: Colors.blue[400],
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
         width: 900,
         child: Form(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-    
-              Container(
+              SizedBox(
                 width: 900,
                 height: 400,
-                decoration: const BoxDecoration(
-                  // color: Colors.grey[200],
-
-                ),
                 child: TextField(
                   expands: true,
                   maxLines: null,
@@ -56,6 +50,17 @@ class _PostFormState extends State<PostForm> {
                   });
                 },
                 ),
+              ),
+              Row(
+                children: [
+                  FilePicker(
+                    onFileSelected: (XFile file){
+                      setState((){
+                        image = file;
+                      });
+                    },
+                  ),
+                ],
               ),
               // добавить в черновик
               SizedBox(
@@ -67,15 +72,7 @@ class _PostFormState extends State<PostForm> {
                     ElevatedButton(
                       //TODO: блокировка кнопки после нажатия
                       onPressed: ()async{
-                        status='draft';
-                        Post post = await makePost(selectedPlatforms);
-                        await PostService.savePost(post);
-                        // // print(post.id);
-                        // List<PlatformPost> platformPosts = buildPlatformPosts(post, selectedPlatforms);
-                        // for(PlatformPost platformPost in platformPosts){
-                        //   platformPost.post=post.id!;
-                        //   PlatformPostService.savePlatformPost(platformPost);
-                        // }
+                        await sendPost();
                       },
                       child: const Text("Добавить в черновик")
                     ),
@@ -91,7 +88,6 @@ class _PostFormState extends State<PostForm> {
               SizedBox(
                 height: 100,
                 child: Row(
-                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Spacer(),
@@ -150,6 +146,7 @@ class _PostFormState extends State<PostForm> {
       author: username,
       platforms: [],
       status: status,
+      media: image,
     );
   }
 
@@ -163,16 +160,19 @@ class _PostFormState extends State<PostForm> {
     }
     return platformPosts;
   }
-  Future<Post> makePost(List<Platform> platforms)async{
-    final prefs = await SharedPreferences.getInstance();
-    String username = prefs.getString('username') ?? '';
-    return Post.generic(
-      text: text,
-      publicationTime: publicationTime,
-      author: username,
-      status: status,
-      platforms: platforms,
-    );
-
+  Future<void> sendPost ()async{
+    // TODO: написать функцию-обертку для обработки исключений
+    status='draft';
+    Post post = await buildPost();
+    await PostService.savePost(post);
+    List<PlatformPost> platformPosts = buildPlatformPosts(post, selectedPlatforms);
+    for(PlatformPost platformPost in platformPosts){
+      platformPost.post=post.id!;
+      try {
+        await PlatformPostService.savePlatformPost(platformPost);
+      } catch (e) {
+        print(e);
+      }
+    }
   }
 }
