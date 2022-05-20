@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gutenberg/util/requests.dart';
+import 'package:gutenberg/util/requests/platform_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/platform.dart';
 
@@ -61,12 +61,12 @@ class _AccountCardState extends State<AccountCard> {
           width: 300,
           height: 300,
           decoration: BoxDecoration(
-            color: AccountCard.platformColors[widget.title]!,
+            color: widget.platform!.color,
             borderRadius: BorderRadius.circular(20),
           ),
           alignment: Alignment.center,
           child: Text(
-            AccountCard.titles[widget.title]!,
+            widget.platform!.title,
             style: GoogleFonts.secularOne(
               fontSize: 20,
               fontWeight: FontWeight.bold,

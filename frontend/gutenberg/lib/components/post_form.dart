@@ -7,7 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import  '../models/post.dart';
 import '../models/platform.dart';
 import '../models/platform_post.dart';
-import '../util/requests.dart';
+import '../util/requests/post_service.dart';
+import '../util/requests/platform_post_service.dart';
 import 'platform_picker.dart';
 import 'file_picker.dart';
 
@@ -26,7 +27,7 @@ class _PostFormState extends State<PostForm> {
   late String author;
   List<Platform> selectedPlatforms = [];
   late String status = 'draft';
-  late XFile? image;
+  XFile? image;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +55,7 @@ class _PostFormState extends State<PostForm> {
               Row(
                 children: [
                   FilePicker(
-                    onFileSelected: (XFile file){
+                    onFileSelected: (XFile? file){
                       setState((){
                         image = file;
                       });
@@ -164,10 +165,13 @@ class _PostFormState extends State<PostForm> {
     // TODO: написать функцию-обертку для обработки исключений
     status='draft';
     Post post = await buildPost();
-    await PostService.savePost(post);
+    int? id = await PostService.savePost(post);
+    print("save post returned: $id");
+    post.id = id!;
+    print("saved post id: ${post.id}");
+  
     List<PlatformPost> platformPosts = buildPlatformPosts(post, selectedPlatforms);
     for(PlatformPost platformPost in platformPosts){
-      platformPost.post=post.id!;
       try {
         await PlatformPostService.savePlatformPost(platformPost);
       } catch (e) {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/platform.dart';
-import '../util/requests.dart';
+import '../util/requests/platform_service.dart';
 import 'platform_chip.dart';
 
 class PlatformPicker extends StatefulWidget {
-  PlatformPicker({ Key? key, required this.onPlatformSelected}) : super(key: key);
+  const PlatformPicker({ Key? key, required this.onPlatformSelected}) : super(key: key);
   final Function(List<Platform>) onPlatformSelected;
 
 
@@ -40,7 +40,7 @@ class _PlatformPickerState extends State<PlatformPicker> {
         else {
           return Container(
             alignment: Alignment.center,
-            child: CircularProgressIndicator(),
+            child: const CircularProgressIndicator(),
           );
         }
       }

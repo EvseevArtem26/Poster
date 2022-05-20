@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../util/requests.dart';
+import '../util/requests/user_service.dart';
 
 class AuthorizationPage extends StatefulWidget {
   const AuthorizationPage({ Key? key }) : super(key: key);

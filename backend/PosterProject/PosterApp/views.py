@@ -76,10 +76,8 @@ class PlatformPostViewSet(ModelViewSet):
 
 	def create(self, request, *args, **kwargs):
 		data = request.data
-		data['media'] = request.FILES['media']
 		serializer = PlatformPostSerializer(data=data)
 		if serializer.is_valid():
-			# serializer.validated_data['media'] = request.FILES['media']
 			serializer.save()
 			send_post(serializer.instance)
 			return Response(serializer.data, status=status.HTTP_201_CREATED)

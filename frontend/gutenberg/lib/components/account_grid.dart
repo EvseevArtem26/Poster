@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import '../util/requests.dart';
+import '../util/requests/platform_service.dart';
 import 'account_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -24,7 +24,7 @@ class _AccountGridState extends State<AccountGrid> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: PlatformService.getPlatforms("draft"),
+      future: PlatformService.getPlatforms(),
       builder: (BuildContext context, snapshot){
         if(snapshot.hasData){
           platforms = List<Platform?>.from(snapshot.data as List<Platform?>);

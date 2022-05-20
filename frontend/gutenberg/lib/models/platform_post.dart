@@ -26,7 +26,7 @@ class PlatformPost {
     String? text;
     DateTime? publicationTime;
     String? status;
-    int? post;
+    int post;
     XFile? media;
     int platform;
 
@@ -36,6 +36,7 @@ class PlatformPost {
         status: post.status,
         post: post.id!,
         platform: platform,
+        media: post.media,
     );
 
     factory PlatformPost.fromJson(Map<String, dynamic> json) => PlatformPost(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gutenberg/util/requests.dart';
+import 'package:gutenberg/util/requests/post_service.dart';
 import '../components/navbar.dart';
 import '../components/post_list.dart';
 import '../components/post_filter.dart';
@@ -76,7 +76,7 @@ class _DraftsPageState extends State<DraftsPage> {
     for (final post in posts) {
       for (final platform in post.platforms) {
         if (!platforms.contains(platform)) {
-          platforms.add(platform);
+          // platforms.add(platform);
         }
       }
     }
@@ -85,11 +85,9 @@ class _DraftsPageState extends State<DraftsPage> {
 
   List<Post> filterPosts(List<Post> posts, List<String> platforms) {
     // return posts that have at least one of the selected platforms
-    print("filterPosts was called");
     return posts.where((post) {
       for (final platform in platforms) {
         if (post.platforms.contains(platform)) {
-          print("post ${post.id} contains $platform");
           return true;
         }
       }
