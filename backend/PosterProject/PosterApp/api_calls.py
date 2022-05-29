@@ -1,9 +1,11 @@
-from multiprocessing.sharedctypes import Value
+import magic 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.proxy import *
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+import selenium.webdriver.support.expected_conditions as EC
 from concurrent import futures
 import time
 from .models import PlatformPost
@@ -18,6 +20,14 @@ def time_this(func):
         print(f"{func.__name__} took {end - start} seconds")
         return result
     return wrapper
+
+
+def get_mime_type(file):
+    initial_pos = file.tell()
+    file.seek(0)
+    mime_type = magic.from_buffer(file.read(2048), mime=True)
+    file.seek(initial_pos)
+    return mime_type.split('/')[0]
 
 
 def initialize_driver(headless=True, vpn=False):
@@ -57,29 +67,24 @@ def activate_vpn(driver):
     time.sleep(2)
 
 
-def log_post(post):
-    # log post to text file
-    with open('post_log.txt', 'a') as f:
-        f.write(f"Created post # {post.id}\n")
-        f.write(f"Current status: {post.status}\n")
-        f.write(f"Platform: {post.platform.platform}\n")
-        f.write(f"Phone: {post.platform.phone_number}\n")
-        f.write(f"Password: {post.platform.password}\n")
-
 @time_this
 def send_post(post):
     # send post to platform
     if post.platform.platform == 'OK':
-        driver = initialize_driver()
+        driver = initialize_driver(headless=False)
         send_post_to_odnoklassniki(driver, post)
         driver.quit()
     if post.platform.platform == 'VK':
-        driver = initialize_driver()
+        driver = initialize_driver(headless=False)
         send_post_to_vkontakte(driver, post)
         driver.quit()
     if post.platform.platform == 'TW':
         driver = initialize_driver(headless=False, vpn=True)
         send_post_to_twitter(driver, post)
+        driver.quit()
+    if post.platform.platform == 'FB':
+        driver = initialize_driver(headless=False, vpn=True)
+        send_post_to_facebook(driver, post)
         driver.quit()
 
 
@@ -102,8 +107,15 @@ def send_post_to_odnoklassniki(driver, post):
     input = driver.find_element(by=By.XPATH, value="//*[@class='posting_itx-w']/div[2]")
     input.send_keys(post.text)
     time.sleep(3)
-    driver.find_element(by=By.XPATH, value="//*[@class='posting_f_ac']/div[2]").click()
+    submit_button = driver.find_element(by=By.XPATH, value="//*[@class='posting_f_ac']/div[2]")
 
+    if post.media:
+        if get_mime_type(post.media) == 'image':
+            driver.find_element(by=By.XPATH, value="//*[@data-l='t,button.photo']").click()
+            time.sleep(3)
+            driver.find_element(by=By.XPATH, value="//*[@id='hook_Block_PopLayer']/div/photo-picker/div/div/div[2]/div/div[3]/div[2]/div[1]/span/input").send_keys(post.media.path)
+            time.sleep(3)
+    submit_button.click()
 
 @time_this
 def send_post_to_vkontakte(driver, post):
@@ -123,6 +135,18 @@ def send_post_to_vkontakte(driver, post):
     time.sleep(5)
     input = driver.find_element(by=By.XPATH, value="//*[@id='post_field']")
     input.send_keys(post.text)
+    if post.media:
+        if get_mime_type(post.media) == 'image':
+            driver.find_element(by=By.XPATH, value="//*[@id='page_add_media']/div[1]/a[1]").click()
+            time.sleep(3)
+            driver.find_element(by=By.XPATH, value="//*[@id='photos_upload_input_729012740_-14']").send_keys(post.media.path)
+        if get_mime_type(post.media) == 'video':
+            driver.find_element(by=By.XPATH, value="//*[@id='page_add_media']/div[1]/a[2]").click()
+            time.sleep(3)
+            driver.find_element(by=By.XPATH, value="//*[@id='choose_video_upload']/input").send_keys(post.media.path)
+        time.sleep(5)
+
+
     action = ActionChains(driver)
     action.key_down(Keys.CONTROL)
     action.send_keys(Keys.ENTER)
@@ -153,14 +177,46 @@ def send_post_to_twitter(driver, post):
     input_field = driver.find_element(by=By.XPATH, value="//*[@class='DraftEditor-editorContainer']/div")
     time.sleep(5)
     input_field.send_keys(post.text)
+    print(post.media.path if post.media else '')
+    if post.media and get_mime_type(post.media) == 'image':
+        driver.find_element(by=By.XPATH,
+        value="//*[@id='layers']/div[2]/div/div/div/div/div/div[2]/div[2]/div/div/div/div[3]/div/div[1]/div/div/div/div/div[2]/div[3]/div/div/div[1]/input").send_keys(post.media.path)
+        time.sleep(5)
+
     action = ActionChains(driver)
     action.key_down(Keys.CONTROL)
     action.send_keys(Keys.ENTER)
     action.key_up(Keys.CONTROL)
     action.perform()
-    # button = driver.find_element(by=By.XPATH, value="//*[@data-testid='tweetButton']")
     time.sleep(5)
-    # button.click()
+
+@time_this
+def send_post_to_facebook(driver, post):
+    activate_vpn(driver)
+    phone = post.platform.phone_number
+    password = post.platform.password
+    driver.get('https://www.facebook.com/')
+    driver.find_element(by=By.ID, value="email").send_keys(phone)
+    time.sleep(3)
+    driver.find_element(by=By.ID, value="pass").send_keys(password, Keys.ENTER)
+    time.sleep(8)
+    driver.get('https://www.facebook.com/profile.php')
+
+    driver.find_element(by=By.XPATH, value="//*[@data-pagelet='ProfileComposer']/div/div/div/div/div[1]/div").click()
+    time.sleep(10)
+    driver.find_element(by=By.XPATH, value="//*[@role='presentation']/div[1]/div/div/div").send_keys(post.text)
+    time.sleep(5)
+    driver.find_element(by=By.XPATH, value="//*[@aria-label='Опубликовать']").click()
+    time.sleep(5)
+
+
+def send_post_to_tiktok(driver, post):
+    phone = post.platform.phone_number
+    password = post.platform.password
+    driver.get("https://www.tiktok.com/login/phone-or-email/phone-password")
+
+
+
 
 @time_this
 def send_post_experimental(post):

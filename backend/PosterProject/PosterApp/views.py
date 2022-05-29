@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from .api_calls import log_post, send_post, send_post_experimental
+from .api_calls import send_post, send_post_experimental
 
 
 # User viewset
