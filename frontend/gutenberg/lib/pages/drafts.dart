@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gutenberg/util/requests/post_service.dart';
+import 'package:provider/provider.dart';
 import '../components/navbar.dart';
 import '../components/post_list.dart';
 import '../components/post_filter.dart';
 import '../models/post.dart';
+import '../providers/user_provider.dart';
 
 class DraftsPage extends StatefulWidget {
   const DraftsPage({ Key? key }) : super(key: key);
@@ -20,7 +22,15 @@ class _DraftsPageState extends State<DraftsPage> {
   @override
   void initState() {
     super.initState();
-    posts = PostService.getPosts("draft");
+    // get token from userProvider
+    String username = Provider.of<UserProvider>(context, listen: false).currentUser!;
+    String token = Provider.of<UserProvider>(context, listen: false).token!;
+
+    posts = PostService.getPosts(
+      username: username,
+      token: token,
+      status: 'draft',
+    );
   }
   @override
   Widget build(BuildContext context) {
@@ -59,7 +69,11 @@ class _DraftsPageState extends State<DraftsPage> {
                   ],
                 ),
               );
-            }else{
+            }
+            else if (snapshot.hasError) {
+              return Text("${snapshot.error}");
+            }
+            else{
               return Container(
                 alignment: Alignment.center,
                 child: const CircularProgressIndicator(),

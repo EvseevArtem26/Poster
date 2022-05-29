@@ -5,3 +5,4 @@ frontend/poster/.editorconfig
 frontend/poster/.eslintrc.js
 frontend/poster/.browserslistrc
 frontend/poster/README.md
+backend/PosterProject/PosterProject/settings.py

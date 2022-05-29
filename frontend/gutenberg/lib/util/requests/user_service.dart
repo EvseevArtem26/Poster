@@ -1,13 +1,12 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/user.dart';
 
 class UserService {
 
-  static Future<User> getUser(int id) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+  static Future<User> getUser(int id, String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
 
     Uri url = Uri(
       scheme: "http",
@@ -30,7 +29,7 @@ class UserService {
     });
   }
 
-  static Future<bool>login(String login, String password)async{
+  static Future<String?>login(String login, String password)async{
     // authorizes user and saves token to shared preferences
     // returns true if login was successful, false otherwise
     Uri url = Uri(
@@ -52,13 +51,13 @@ class UserService {
     );
     if(response.statusCode == 200){
       Map body = jsonDecode(response.body);
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString("token", body["auth_token"]);
-      prefs.setString("username", login);
-      return true;
+      // SharedPreferences prefs = await SharedPreferences.getInstance();
+      // prefs.setString("token", body["auth_token"]);
+      // prefs.setString("username", login);
+      return body["auth_token"];
     }
     else{
-      return false;
+      return null;
     }
   }
 

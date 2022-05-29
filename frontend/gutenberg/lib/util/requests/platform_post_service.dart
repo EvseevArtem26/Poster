@@ -2,7 +2,6 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/platform_post.dart';
 class PlatformPostService {
   
@@ -13,9 +12,9 @@ class PlatformPostService {
     return imageBytes;
   }
 
-  static Future<List<PlatformPost>> getPlatformPosts () async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+  static Future<List<PlatformPost>> getPlatformPosts (String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
      Uri url = Uri(
       scheme: 'http',
       host: 'localhost',
@@ -41,9 +40,9 @@ class PlatformPostService {
     }
   }
 
-  static Future<PlatformPost> getPlatformPost(int id) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+  static Future<PlatformPost> getPlatformPost(int id, String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
 
     Uri url = Uri(
       scheme: "http",
@@ -65,9 +64,9 @@ class PlatformPostService {
     } 
   }
 
-  static Future<void> savePlatformPost(PlatformPost platformPost) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+  static Future<void> savePlatformPost(PlatformPost platformPost, String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
     Uri url = Uri(
       scheme: 'http',
       host: 'localhost',
@@ -100,9 +99,9 @@ class PlatformPostService {
     }
   }
 
-  static Future<void> updatePlatformPost(PlatformPost platformPost) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+  static Future<void> updatePlatformPost(PlatformPost platformPost, String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
     Uri url = Uri(
       scheme: 'http',
       host: 'localhost',
@@ -124,9 +123,9 @@ class PlatformPostService {
     }
   }
 
-  static Future<void> deletePlatformPost(int id) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+  static Future<void> deletePlatformPost(int id, String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
     Uri url = Uri(
       scheme: 'http',
       host: 'localhost',

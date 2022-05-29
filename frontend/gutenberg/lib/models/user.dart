@@ -13,25 +13,21 @@ class User {
         this.pk,
         required this.username,
         required this.email,
-        required this.userpic,
     });
 
     int? pk;
     String username;
     String email;
-    String userpic;
 
     factory User.fromJson(Map<String, dynamic> json) => User(
         pk: json["pk"],
         username: json["username"],
         email: json["email"],
-        userpic: json["userpic"],
     );
 
     Map<String, dynamic> toJson() => {
         "pk": pk,
         "username": username,
         "email": email,
-        "userpic": userpic,
     };
 }

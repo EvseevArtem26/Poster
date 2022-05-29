@@ -4,9 +4,15 @@ import '../util/requests/platform_service.dart';
 import 'platform_chip.dart';
 
 class PlatformPicker extends StatefulWidget {
-  const PlatformPicker({ Key? key, required this.onPlatformSelected}) : super(key: key);
+  const PlatformPicker({ 
+    Key? key, 
+    required this.onPlatformSelected,
+    required this.username,
+    required this.token
+  }) : super(key: key);
   final Function(List<Platform>) onPlatformSelected;
-
+  final String username;
+  final String token;
 
   @override
   State<PlatformPicker> createState() => _PlatformPickerState();
@@ -19,7 +25,7 @@ class _PlatformPickerState extends State<PlatformPicker> {
   @override
   void initState() {
     super.initState();
-    availablePlatforms = PlatformService.getPlatforms();
+    availablePlatforms = PlatformService.getPlatforms(widget.username, widget.token);
   }
   @override
   Widget build(BuildContext context) {

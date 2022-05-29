@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../util/requests/platform_service.dart';
 import 'account_card.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../models/platform.dart';
 
@@ -11,7 +11,15 @@ import '../models/platform.dart';
 class AccountGrid extends StatefulWidget {
   final double width;
   final double height;
-  const AccountGrid({ Key? key, required this.width, required this.height }) : super(key: key);
+  final String username;
+  final String token;
+  const AccountGrid({ 
+    Key? key, 
+    required this.width, 
+    required this.height,
+    required this.username,
+    required this.token
+  }) : super(key: key);
 
   @override
   State<AccountGrid> createState() => _AccountGridState();
@@ -24,7 +32,7 @@ class _AccountGridState extends State<AccountGrid> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: PlatformService.getPlatforms(),
+      future: PlatformService.getPlatforms(widget.username, widget.token),
       builder: (BuildContext context, snapshot){
         if(snapshot.hasData){
           platforms = List<Platform?>.from(snapshot.data as List<Platform?>);
@@ -47,6 +55,8 @@ class _AccountGridState extends State<AccountGrid> {
                       onChanged: (){
                         setState(() {});
                       },
+                      token: widget.token,
+                      username: widget.username,
                     ),
                     AccountCard(
                       platform:  findByName('VK'),
@@ -54,6 +64,8 @@ class _AccountGridState extends State<AccountGrid> {
                       onChanged: (){
                         setState(() {});
                       },
+                      token: widget.token,
+                      username: widget.username,
                     ),
                     AccountCard(
                       platform:  findByName('TW'),
@@ -61,6 +73,8 @@ class _AccountGridState extends State<AccountGrid> {
                       onChanged: (){
                         setState(() {});
                       },
+                      token: widget.token,
+                      username: widget.username,
                     ),
                     AccountCard(
                       platform: findByName('IG'),
@@ -68,6 +82,8 @@ class _AccountGridState extends State<AccountGrid> {
                       onChanged: (){
                         setState(() {});
                       },
+                      token: widget.token,
+                      username: widget.username,
                     )
                   ],
                 ),
@@ -80,6 +96,8 @@ class _AccountGridState extends State<AccountGrid> {
                       onChanged: (){
                         setState(() {});
                       },
+                      token: widget.token,
+                      username: widget.username,
                     ),
                     AccountCard(
                       platform: findByName('YT'),
@@ -87,6 +105,8 @@ class _AccountGridState extends State<AccountGrid> {
                       onChanged: (){
                         setState(() {});
                       },
+                      token: widget.token,
+                      username: widget.username,
                     ),
                     AccountCard(
                       platform:  findByName('TG'),
@@ -94,6 +114,8 @@ class _AccountGridState extends State<AccountGrid> {
                       onChanged: (){
                         setState(() {});
                       },
+                      token: widget.token,
+                      username: widget.username,
                     ),
                     AccountCard(
                       platform: findByName('OK'),
@@ -101,6 +123,8 @@ class _AccountGridState extends State<AccountGrid> {
                       onChanged: (){
                         setState(() {});
                       },
+                      token: widget.token,
+                      username: widget.username,
                     )
                   ],
                 )
@@ -120,22 +144,22 @@ class _AccountGridState extends State<AccountGrid> {
     );
   }
   Future<List<Platform?>> getPlatforms () async {
-    final prefs = await SharedPreferences.getInstance();
-    String? username = prefs.getString('username');
-    String token = prefs.getString('token') ?? '';
+    // final prefs = await SharedPreferences.getInstance();
+    // String? username = prefs.getString('username');
+    // String token = prefs.getString('token') ?? '';
      Uri url = Uri(
       scheme: 'http',
       host: 'localhost',
       port: 8000,
       path: 'poster/platforms/',
       queryParameters: {
-        'username': username,
+        'username': widget.username,
       },
     );
     http.Response response = await http.get(
       url,
       headers: {
-        'Authorization': 'Token $token',
+        'Authorization': 'Token ${widget.token}',
       },
     );
     if (response.statusCode == 200) {

@@ -1,13 +1,12 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/platform.dart';
 
 class PlatformService {
-  static Future<List<Platform>> getPlatforms () async {
-    final prefs = await SharedPreferences.getInstance();
-    String? username = prefs.getString('username');
-    String token = prefs.getString('token') ?? '';
+  static Future<List<Platform>> getPlatforms (String username, String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String? username = prefs.getString('username');
+    // String token = prefs.getString('token') ?? '';
      Uri url = Uri(
       scheme: 'http',
       host: 'localhost',
@@ -34,9 +33,9 @@ class PlatformService {
     }
   }
 
-  static Future<Platform> getPlatform(int id) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+  static Future<Platform> getPlatform(int id, String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
 
     Uri url = Uri(
       scheme: "http",
@@ -58,9 +57,9 @@ class PlatformService {
     } 
   }
 
-  static Future<void> savePlatform(Platform platform) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+  static Future<void> savePlatform(Platform platform, String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
     Uri url = Uri(
       scheme: 'http',
       host: 'localhost',
@@ -82,9 +81,9 @@ class PlatformService {
     }
   }
 
-  static Future<void> updatePlatform(Platform platform) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+  static Future<void> updatePlatform(Platform platform, String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
     Uri url = Uri(
       scheme: 'http',
       host: 'localhost',
@@ -106,9 +105,9 @@ class PlatformService {
     }
   }
 
-  static Future<void> deletePlatform(int id) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+  static Future<void> deletePlatform(int id, String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
     Uri url = Uri(
       scheme: 'http',
       host: 'localhost',

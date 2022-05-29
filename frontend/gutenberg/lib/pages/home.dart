@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gutenberg/components/account_grid.dart';
+import 'package:gutenberg/providers/user_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../components/navbar.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -32,72 +34,85 @@ class _HomePageState extends State<HomePage> {
         child: NavBar(),
         preferredSize: Size.fromHeight(60),
       ),
-      body: Container(
-        alignment: Alignment.center,
-        child: Column(
-          children: [
-            Row(
-              children: [
-                FutureBuilder(
-                  future: getUser(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      String name = snapshot.data as String;
-                      return Text(
-                        name,
-                        style: GoogleFonts.secularOne(
-                          fontSize: 32,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      );
-                    } else {
-                      return Container();
-                    }
-                  },
-                ),
-                TextButton(
-                  child: Text(
-                    'Выйти',
+      body: Consumer<UserProvider>(
+        builder: (context, value, child) => Container(
+          alignment: Alignment.center,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  // FutureBuilder(
+                  //   future: getUser(),
+                  //   builder: (context, snapshot) {
+                  //     if (snapshot.hasData) {
+                  //       String name = snapshot.data as String;
+                  //       return Text(
+                  //         name,
+                  //         style: GoogleFonts.secularOne(
+                  //           fontSize: 32,
+                  //           color: Colors.black,
+                  //           fontWeight: FontWeight.bold,
+                  //           fontStyle: FontStyle.italic,
+                  //         ),
+                  //       );
+                  //     } else {
+                  //       return Container();
+                  //     }
+                  //   },
+                  // ),
+                  Text(
+                    value.currentUser!,
                     style: GoogleFonts.secularOne(
-                      fontSize: 16,
+                      fontSize: 32,
+                      color: Colors.black,
                       fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
-                  onPressed: () async {
-                    SharedPreferences prefs = await SharedPreferences.getInstance();
-                    prefs.clear();
-                    Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> route) => false);
-                  },
-                ),
-              ],
-            ),
-            Text(
-              'Accounts',
-              style: GoogleFonts.secularOne(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+                  TextButton(
+                    child: Text(
+                      'Выйти',
+                      style: GoogleFonts.secularOne(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onPressed: () async {
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      prefs.clear();
+                      Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> route) => false);
+                    },
+                  ),
+                ],
               ),
-            ),
-            //4x2 grid of account cards from platforms map
-            AccountGrid(
-              width: double.infinity,
-              height: 800,
-            )           
-          ],
-          
-        )
+              Text(
+                'Accounts',
+                style: GoogleFonts.secularOne(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              //4x2 grid of account cards from platforms map
+              AccountGrid(
+                username: value.currentUser!,
+                token: value.token!,
+                width: double.infinity,
+                height: 800,
+              )           
+            ],
+            
+          )
+        ),
       )
     );
   }
 
-  Future<String?> getToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('token');
-  }
-  Future<String?> getUser() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('username');
-  }
+//   Future<String?> getToken() async {
+//     SharedPreferences prefs = await SharedPreferences.getInstance();
+//     return prefs.getString('token');
+//   }
+//   Future<String?> getUser() async {
+//     SharedPreferences prefs = await SharedPreferences.getInstance();
+//     return prefs.getString('username');
+//   }
 }

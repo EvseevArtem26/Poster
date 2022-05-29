@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../models/post.dart';
 
@@ -14,10 +13,10 @@ class PostService {
     return imageBytes;
   }
 
-  static Future<List<Post>> getPosts(String status) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
-    String? username = prefs.getString('username');
+  static Future<List<Post>> getPosts({required String username, required String status, required String token}) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
+    // String? username = prefs.getString('username');
 
     Uri url = Uri(
       scheme: "http",
@@ -34,15 +33,16 @@ class PostService {
     );
     if (response.statusCode == 200) {
       List<dynamic> body = jsonDecode(response.body);
+      print(body);
       return List<Post>.from(body.map((x) => Post.fromJson(x)));
     } else {
       throw Exception('Failed to load posts');
     }
   }
 
-  static Future<Post> getPost(int id) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+  static Future<Post> getPost(int id, String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
 
     Uri url = Uri(
       scheme: "http",
@@ -64,10 +64,10 @@ class PostService {
     }
   }
 
-  static Future<int?> savePost(Post post) async {
+  static Future<int?> savePost(Post post, String token) async {
     
-    final prefs = await SharedPreferences.getInstance();
-      String token = prefs.getString('token') ?? '';
+    // final prefs = await SharedPreferences.getInstance();
+      // String token = prefs.getString('token') ?? '';
 
     Uri url = Uri(
       scheme: "http",
@@ -99,7 +99,6 @@ class PostService {
       String body = await response.stream.bytesToString();
       Map<String, dynamic> json = jsonDecode(body);
       id = json['id'];
-      print('response id: $id');
       return id;
     }
     else {
@@ -107,9 +106,9 @@ class PostService {
     }
   }
 
-  static Future<void> updatePost(Post post) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+  static Future<void> updatePost(Post post, String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
 
     Uri url = Uri(
       scheme: "http",
@@ -132,9 +131,9 @@ class PostService {
       }
   }
 
-  static Future<void> deletePost(int id) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+  static Future<void> deletePost(int id, String token) async {
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
 
     Uri url = Uri(
       scheme: "http",
