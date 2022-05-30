@@ -2,23 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gutenberg/util/requests/platform_service.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/platform.dart';
 
 class AccountCard extends StatefulWidget {
   final Platform? platform;
   final String title;
   final Function() onChanged;
-  final String token;
-  final String username;
   const AccountCard(
     { 
       Key? key, 
       this.platform, 
       required this.title,
       required this.onChanged,
-      required this.token,
-      required this.username
     }
     ) : super(key: key);
   static const Map<String, String> titles = {
@@ -123,7 +119,7 @@ class _AccountCardState extends State<AccountCard> {
                 ),
                 ElevatedButton(
                   onPressed: ()async{
-                    await PlatformService.deletePlatform(widget.platform!.id!, widget.token);
+                    await PlatformService.deletePlatform(widget.platform!.id!);
                     cardKey.currentState?.toggleCard();
                     loginController.clear();
                     passwordController.clear();
@@ -217,7 +213,7 @@ class _AccountCardState extends State<AccountCard> {
                 onPressed: () async {
                   //send data to server
                   Platform platform = await buildPlatform();
-                  await PlatformService.savePlatform(platform, widget.token);
+                  await PlatformService.savePlatform(platform);
                   cardKey.currentState!.toggleCard();
                   widget.onChanged();
                 },
@@ -234,8 +230,8 @@ class _AccountCardState extends State<AccountCard> {
 
   Future<Platform> buildPlatform()async{
     // builds platform object from card state
-    // final prefs = await SharedPreferences.getInstance();
-    // String username = prefs.getString('username')!;
+    final prefs = await SharedPreferences.getInstance();
+    String username = prefs.getString('username')!;
 
     return Platform(
       platform: widget.title,
@@ -243,7 +239,7 @@ class _AccountCardState extends State<AccountCard> {
       password: passwordController.text,
       email: emailController.text,
       phoneNumber: phoneController.text,
-      user: widget.username,
+      user: username,
     );
   }
 }

@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:gutenberg/components/platform_picker.dart';
 import 'package:gutenberg/models/platform_post.dart';
-import 'package:gutenberg/providers/user_provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import  '../models/post.dart';
 import '../models/platform.dart';
@@ -57,7 +55,7 @@ class _PostFormState extends State<PostForm> {
               ),
               Row(
                 children: [
-                  FilePicker(
+                  MyFilePicker(
                     onFileSelected: (XFile? file){
                       setState((){
                         image = file;
@@ -69,25 +67,23 @@ class _PostFormState extends State<PostForm> {
               // добавить в черновик
               SizedBox(
                 height: 50,
-                child: Consumer<UserProvider>(
-                  builder: (context, user, child) => Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        //TODO: блокировка кнопки после нажатия
-                        onPressed: ()async{
-                          await sendPost(user.token!);
-                        },
-                        child: const Text("Добавить в черновик")
-                      ),
-                      const ElevatedButton(
-                        onPressed: null,
-                        child: Text("Опубликовать"),
-                      ),
-                      
-                    ],
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      //TODO: блокировка кнопки после нажатия
+                      onPressed: ()async{
+                        await sendPost();
+                      },
+                      child: const Text("Добавить в черновик")
+                    ),
+                    const ElevatedButton(
+                      onPressed: null,
+                      child: Text("Опубликовать"),
+                    ),
+                    
+                  ],
                 ),
               ),
               // время публикации
@@ -126,16 +122,12 @@ class _PostFormState extends State<PostForm> {
                     const Spacer(),
                     Flexible(
                       flex: 2,
-                      child: Consumer<UserProvider>(
-                        builder: (context, value, child) => PlatformPicker(
-                          username: value.currentUser!,
-                          token: value.token!,
-                          onPlatformSelected: (List<Platform> platforms){
-                            setState(() {
-                              selectedPlatforms = platforms;
-                            });
-                          },
-                        )
+                      child: PlatformPicker(
+                        onPlatformSelected: (List<Platform> platforms){
+                          setState(() {
+                            selectedPlatforms = platforms;
+                          });
+                        },
                       )
                     ),
                     const Spacer()
@@ -171,17 +163,17 @@ class _PostFormState extends State<PostForm> {
     }
     return platformPosts;
   }
-  Future<void> sendPost (String token)async{
+  Future<void> sendPost ()async{
     // TODO: написать функцию-обертку для обработки исключений
     status='draft';
     Post post = await buildPost();
-    int? id = await PostService.savePost(post, token);
+    int? id = await PostService.savePost(post);
     post.id = id!;
   
     List<PlatformPost> platformPosts = buildPlatformPosts(post, selectedPlatforms);
     for(PlatformPost platformPost in platformPosts){
       try {
-        await PlatformPostService.savePlatformPost(platformPost, token);
+        await PlatformPostService.savePlatformPost(platformPost);
       } catch (e) {
         print(e);
       }
