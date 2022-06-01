@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:gutenberg/components/account_grid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../components/navbar.dart';
+import 'package:card_swiper/card_swiper.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../components/navbar.dart';
+import '../components/platform_card.dart';
+import '../components/new_platform_form.dart';
+import '../models/platform.dart';
+import '../util/requests/platform_service.dart';
 
 class HomePage extends StatefulWidget{
   const HomePage({Key? key}) : super(key: key);
@@ -12,81 +16,131 @@ class HomePage extends StatefulWidget{
 }
 
 class _HomePageState extends State<HomePage> {
-  Map<String, Color> platforms = 
-    {
-      'Facebook': const Color.fromARGB(255, 59, 89, 152),
-      'Vkontakte': const Color.fromARGB(255, 38, 5, 137),
-      'Twitter': const Color.fromARGB(255, 0, 172, 237),
-      'Instagram': const Color.fromARGB(247, 224, 221, 14),
-      'TikTok': const Color.fromARGB(255, 255, 64, 129),
-      'Youtube': const Color.fromARGB(255, 222, 18, 18),
-      'Telegram':  const Color.fromARGB(255, 0, 172, 237),
-      'Odnoklassniki': const Color.fromARGB(255, 237, 118, 0),
-    };
-  
- 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar:  const PreferredSize(
-        child: NavBar(),
+        child: NavBar(initialIndex: 0),
         preferredSize: Size.fromHeight(60),
       ),
       body: Container(
         alignment: Alignment.center,
         child: Column(
           children: [
-            Row(
-              children: [
-                FutureBuilder(
-                  future: getUser(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      String name = snapshot.data as String;
-                      return Text(
-                        name,
-                        style: GoogleFonts.secularOne(
-                          fontSize: 32,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      );
-                    } else {
-                      return Container();
-                    }
-                  },
-                ),
-                TextButton(
-                  child: Text(
-                    'Выйти',
-                    style: GoogleFonts.secularOne(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  FutureBuilder(
+                    future: getUser(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        String name = snapshot.data as String;
+                        return Text(
+                          name,
+                          style: GoogleFonts.secularOne(
+                            fontSize: 32,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    },
                   ),
-                  onPressed: () async {
-                    SharedPreferences prefs = await SharedPreferences.getInstance();
-                    prefs.clear();
-                    Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> route) => false);
-                  },
-                ),
-              ],
+                  OutlinedButton(
+                    child: Text(
+                      'Выйти',
+                      style: GoogleFonts.secularOne(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ButtonStyle(
+                      side: MaterialStateProperty.all(
+                        BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    onPressed: () async {
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      prefs.clear();
+                      Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> route) => false);
+                    },
+                  ),
+                ], 
+              ),
             ),
             Text(
-              'Accounts',
+              'Аккаунты',
               style: GoogleFonts.secularOne(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+                fontSize: 32,
               ),
             ),
             //4x2 grid of account cards from platforms map
-            AccountGrid(
-              width: double.infinity,
+            Container(
+              width: 1200,
               height: 800,
-            )           
-          ],
-          
+              alignment: Alignment.center,
+              child: FutureBuilder(
+                future: PlatformService.getPlatforms(),
+                builder: (context, snapshot){
+                  if(snapshot.hasData){
+                    List<Platform> platforms = snapshot.data as List<Platform>;
+                    int itemcount = platforms.length > 7 ? 8 : platforms.length + 1;
+                    return Swiper(
+                      itemCount: itemcount,
+                      itemWidth: 1000,
+                      itemHeight: 600,
+                      itemBuilder: (context, index){
+                        if(itemcount > platforms.length && index == itemcount-1){
+                          Set<String> allPlatforms = {"VK", "FB", "TW", "IG", "TT", "YT", "TG", "OK"};
+                          Set<String> existingPlatforms = platforms.map((platform) => platform.platform).toSet();
+                          Set<String> availablePlatforms = allPlatforms.difference(existingPlatforms);
+                          return Center(
+                            child: NewPlatformForm(
+                              availablePlatforms: availablePlatforms.toList(),
+                              onChanged: (){
+                                setState(() {});
+                              },
+                            ),
+                          );
+                        }
+                        else{
+                          return Center(
+                            child: PlatformCard(
+                              platform: platforms[index],
+                              onChanged: (){
+                                setState(() {});
+                              },
+                            ),
+                          );
+                        }
+                      },
+                      control: SwiperControl(
+                        color: Theme.of(context).colorScheme.primary,
+                        padding: const EdgeInsets.all(5)
+                      ),
+                    );
+                  }
+                  else if (snapshot.hasError){
+                    return Center(
+                      child: Text(snapshot.error.toString())
+                    );
+                  }
+                  else {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                },
+              ),
+            ),
+          ],     
         )
       )
     );
