@@ -4,32 +4,35 @@ import '../components/navbar.dart';
 import '../components/post_display.dart';
 import '../models/post.dart';
 
-class DraftsPage extends StatefulWidget {
-  const DraftsPage({ Key? key }) : super(key: key);
+class DelayedPage extends StatefulWidget {
+  const DelayedPage({ Key? key }) : super(key: key);
 
   @override
-  State<DraftsPage> createState() => _DraftsPageState();
+  State<DelayedPage> createState() => _DelayedPageState();
 }
 
-class _DraftsPageState extends State<DraftsPage> {
+class _DelayedPageState extends State<DelayedPage> {
+
+  late Future<List<Post>> posts;
   late List<Post> filteredPosts;
 
   @override
   void initState() {
     super.initState();
+    posts = PostService.getPosts("delayed");
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const PreferredSize(
         preferredSize: Size.fromHeight(60),
-        child: NavBar(initialIndex: 2),
+        child: NavBar(initialIndex: 4),
       ),
       body: Container(
         alignment: Alignment.center,
         child: FutureBuilder(
 
-          future: PostService.getPosts("draft"),
+          future: posts,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               List<Post> allPosts = snapshot.data as List<Post>;

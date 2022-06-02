@@ -16,8 +16,8 @@ class PostService {
 
   static Future<List<Post>> getPosts(String status) async {
     final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
-    String? username = prefs.getString('username');
+    String token = prefs.getString('token')!;
+    String username = prefs.getString('username')!;
 
     Uri url = Uri(
       scheme: "http",
@@ -103,7 +103,8 @@ class PostService {
       return id;
     }
     else {
-      throw Exception('Failed to create post\ncode: ${response.statusCode}');
+      String body = await response.stream.bytesToString();
+      throw Exception('Failed to create post\ncode: ${response.statusCode}\nresponse: $body');
     }
   }
 
@@ -117,19 +118,28 @@ class PostService {
       port: 8000,
       path: "/poster/posts/${post.id}/",
     );
-    String json = jsonEncode(post.toJson());
-    var response = await http.put(
-      url, 
-      body: json,
-      headers: {
-        "content-type": "application/json",
-        "accept": "application/json",
-        "Authorization": "Token $token"
-      }
-    );
+    http.MultipartRequest request = http.MultipartRequest("PUT", url,);
+    request.headers['Authorization'] = "Token $token";
+    request.headers['content-type'] = "multipart/form-data";
+    request.headers['accept'] = "application/json";
+
+    request.fields['text'] = post.text;
+    request.fields['publication_time'] = post.publicationTime.toIso8601String();
+    request.fields['author'] = post.author;
+    request.fields['status'] = post.status;
+    if(post.media != null){
+      List<int> bytes = await _getImageBytes(post.media!);
+      request.files.add(http.MultipartFile.fromBytes(
+        'media',
+        bytes,
+        filename: post.media!.name,
+      ));
+    }
+    var response = await request.send();
     if(response.statusCode != 200){
-        throw Exception('Failed to update post\ncode: ${response.statusCode}');
-      }
+      String body = await response.stream.bytesToString();
+      throw Exception('Failed to update post\ncode: ${response.statusCode}\nresponse: $body');
+    }
   }
 
   static Future<void> deletePost(int id) async {
@@ -150,6 +160,29 @@ class PostService {
     );
     if(response.statusCode != 204){
         throw Exception('Failed to delete post\ncode: ${response.statusCode}');
-      }
+    }
+  }
+
+  static Future<void> publishPost(int id) async {
+    final prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
+    Uri url = Uri(
+      scheme: "http",
+      host: "localhost",
+      port: 8000,
+      path: "/poster/posts/$id/",
+    );
+    var response = await http.patch(
+      url,
+      body: jsonEncode({'status': 'published'}),
+      headers: {
+        "content-type": "application/json",
+        "accept": "application/json",
+        "Authorization": "Token $token",
+      },
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to publish post\ncode: ${response.statusCode}');
+    }
   }
 }

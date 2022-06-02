@@ -36,6 +36,7 @@ class Post {
         publicationTime: DateTime.parse(json["publication_time"]),
         status: json["status"],
         platforms: List<String>.from(json["platforms"]),
+        media: json["media"] == null ? null : XFile(json["media"]),
       );
 
     Map<String, dynamic> toJson() => {

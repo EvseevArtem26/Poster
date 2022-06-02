@@ -14,7 +14,8 @@ import 'file_picker.dart';
 
 
 class PostForm extends StatefulWidget {
-  const PostForm({ Key? key }) : super(key: key);
+  PostForm({ Key? key, this.draft }) : super(key: key);
+  Post? draft;
 
   @override
   State<PostForm> createState() => _PostFormState();
@@ -22,12 +23,27 @@ class PostForm extends StatefulWidget {
 
 class _PostFormState extends State<PostForm> {
 
-  late String text;
-  late DateTime publicationTime;
-  late String author;
+  String text = '';
+  DateTime publicationTime = DateTime.now();
   List<Platform> selectedPlatforms = [];
-  late String status = 'draft';
   XFile? image;
+
+  late TextEditingController _textController;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.draft != null) {
+      text = widget.draft!.text;
+      _textController = TextEditingController(text: widget.draft!.text);
+      publicationTime = widget.draft!.publicationTime;
+      image = widget.draft!.media;
+      setState((){});
+    }
+    else {
+      _textController = TextEditingController();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,11 +62,12 @@ class _PostFormState extends State<PostForm> {
                 child: TextField(
                   expands: true,
                   maxLines: null,
-                  onChanged: (String value){
-                  setState((){
-                    text = value;
-                  });
-                },
+                  controller: _textController,
+                  // onChanged: (String value){
+                  // setState((){
+                  //   text = value;
+                  // });
+                // },
                 ),
               ),
               Row(
@@ -61,6 +78,7 @@ class _PostFormState extends State<PostForm> {
                         image = file;
                       });
                     },
+                    image: image,
                   ),
                 ],
               ),
@@ -74,12 +92,16 @@ class _PostFormState extends State<PostForm> {
                     ElevatedButton(
                       //TODO: блокировка кнопки после нажатия
                       onPressed: ()async{
-                        await sendPost();
+                        bool edit = widget.draft != null;
+                        await sendPost(editMode: edit, draft: true);
                       },
                       child: const Text("Добавить в черновик")
                     ),
-                    const ElevatedButton(
-                      onPressed: null,
+                    ElevatedButton(
+                      onPressed: ()async{
+                        bool edit = widget.draft != null;
+                        await sendPost(editMode: edit, draft: false);
+                      },
                       child: Text("Опубликовать"),
                     ),
                     
@@ -96,14 +118,13 @@ class _PostFormState extends State<PostForm> {
                     Flexible(
                       flex: 2,
                       child: DateTimePicker(
-                        //TODO: передавать datetime.now() по умолчанию
                         type: DateTimePickerType.dateTime,
-                        initialValue: DateTime.now().toString(),
+                        initialValue: publicationTime.isBefore( DateTime.now() ) ? DateTime.now().toString() : publicationTime.toString(),
                         firstDate: DateTime.now(),
                         lastDate: DateTime(2100),
                         icon: const Icon(Icons.event),
-                        dateLabelText: 'Date',
-                        timeLabelText: "Hour",
+                        dateLabelText: 'Дата',
+                        timeLabelText: "Время",
                         onChanged: (String value){
                           setState(() {
                             publicationTime = DateTime.parse(value);
@@ -140,11 +161,11 @@ class _PostFormState extends State<PostForm> {
       ),
     );
   }
-  Future<Post> buildPost()async{
+  Future<Post> buildPost({required String status})async{
     final prefs = await SharedPreferences.getInstance();
     String username = prefs.getString('username') ?? '';
     return Post(   
-      text: text,
+      text: _textController.text,
       publicationTime: publicationTime,
       author: username,
       platforms: [],
@@ -163,19 +184,48 @@ class _PostFormState extends State<PostForm> {
     }
     return platformPosts;
   }
-  Future<void> sendPost ()async{
+  Future<void> sendPost ({bool editMode=false, bool draft=true})async{
     // TODO: написать функцию-обертку для обработки исключений
-    status='draft';
-    Post post = await buildPost();
-    int? id = await PostService.savePost(post);
-    post.id = id!;
-  
-    List<PlatformPost> platformPosts = buildPlatformPosts(post, selectedPlatforms);
-    for(PlatformPost platformPost in platformPosts){
-      try {
-        await PlatformPostService.savePlatformPost(platformPost);
-      } catch (e) {
-        print(e);
+    if(editMode){
+      if (draft){
+        Post post = await buildPost(status: 'draft');
+        post.id = widget.draft!.id!;
+        await PostService.updatePost(post);
+      }
+      else {
+        await PostService.deletePost(widget.draft!.id!);
+        String status = publicationTime.subtract(Duration(minutes: 5)).isBefore(DateTime.now()) ? 'waiting' : 'delayed';
+        Post post = await buildPost(status: status);
+        int? id = await PostService.savePost(post);
+        post.id = id!;
+    
+        List<PlatformPost> platformPosts = buildPlatformPosts(post, selectedPlatforms);
+        for(PlatformPost platformPost in platformPosts){
+          try {
+            await PlatformPostService.savePlatformPost(platformPost);
+          } catch (e) {
+            print(e);
+          }
+        }
+      }
+    }
+    else {
+      // if post is completely new:
+      String status = 'draft';
+      if (!draft){
+        status = publicationTime.subtract(Duration(minutes: 5)).isBefore(DateTime.now()) ? 'waiting' : 'delayed';
+      }
+      Post post = await buildPost(status: status);
+      int? id = await PostService.savePost(post);
+      post.id = id!;
+    
+      List<PlatformPost> platformPosts = buildPlatformPosts(post, selectedPlatforms);
+      for(PlatformPost platformPost in platformPosts){
+        try {
+          await PlatformPostService.savePlatformPost(platformPost);
+        } catch (e) {
+          print(e);
+        }
       }
     }
   }

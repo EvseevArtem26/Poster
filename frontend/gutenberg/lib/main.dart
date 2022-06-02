@@ -4,6 +4,8 @@ import 'pages/authorization.dart';
 import 'pages/home.dart';
 import 'pages/new_post.dart';
 import 'pages/drafts.dart';
+import 'pages/delayed.dart';
+import 'pages/published.dart';
 
 
 void main() {
@@ -19,17 +21,20 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(
+          brightness: Brightness.light,
+          seedColor: const Color(0x00EE0290)
+        )
       ),
-      home: RegistrationPage(),
       initialRoute: '/login',
       routes: {
-        // '/': (context) => RegistrationPage(),
-        '/login': (context) => AuthorizationPage(),
-        '/registration': (context) => RegistrationPage(),
-        '/home': (context) => HomePage(),
+        '/login': (context) => const AuthorizationPage(),
+        '/registration': (context) => const RegistrationPage(),
+        '/home': (context) => const HomePage(),
         '/add': (context) => NewPostPage(),
-        '/drafts': (context) => DraftsPage(),
+        '/drafts': (context) => const DraftsPage(),
+        '/delayed': (context) => const DelayedPage(),
+        '/published': (context) => const PublishedPage(),
       },
     );
   }

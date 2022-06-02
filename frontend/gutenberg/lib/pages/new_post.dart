@@ -1,33 +1,29 @@
 import 'package:flutter/material.dart';
 import '../components/navbar.dart';
 import '../components/post_form.dart';
+import '../models/post.dart';
 
 
 class NewPostPage extends StatefulWidget {
-  const NewPostPage({Key? key}) : super(key: key);
+  NewPostPage({Key? key, this.draft}) : super(key: key);
+
+  Post? draft;
 
   @override
   State<NewPostPage> createState() => _NewPostPageState();
 }
 
 class _NewPostPageState extends State<NewPostPage> {
-
-  late String text;
-  late DateTime publicationTime;
-  late String author;
-  late List platforms = [];
-  late String status = 'draft';
-
   @override
   Widget build(BuildContext context) {
   
-    return const Scaffold(
-      appBar: PreferredSize(
-        child: NavBar(),
+    return Scaffold(
+      appBar: const PreferredSize(
+        child: NavBar(initialIndex: 1,),
         preferredSize: Size.fromHeight(60),
       ),
       body: Center(
-        child: PostForm(),
+        child: PostForm(draft: widget.draft),
       ),
     );
   }
