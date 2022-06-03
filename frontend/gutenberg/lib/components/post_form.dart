@@ -78,7 +78,7 @@ class _PostFormState extends State<PostForm> {
                         image = file;
                       });
                     },
-                    image: image,
+                    image: widget.draft!=null ? widget.draft!.media : null,
                   ),
                 ],
               ),

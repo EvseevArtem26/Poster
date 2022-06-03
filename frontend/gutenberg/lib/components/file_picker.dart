@@ -53,8 +53,10 @@ class _MyFilePickerState extends State<MyFilePicker> {
           },
         ),
       );
-    } else {
+    } 
+    else {
       if(widget.image!=null) {
+        // if image comes from the server
         if(image!.path.endsWith("jpg") || image!.path.endsWith("png")){
           return Image.network(
             image!.path,
@@ -70,12 +72,13 @@ class _MyFilePickerState extends State<MyFilePicker> {
             width: 200,
             height: 100,
             child: Text(
-              "${image!.name}is not an image or video"
+              "${image!.path} is not an image or video"
             ),
           );
         }
       }
-      else {   
+      else { 
+        // if image comes from the device  
         if (image!.name.endsWith('jpg') || image!.name.endsWith('png')) {
           return SizedBox(
             width: 200,
@@ -100,7 +103,7 @@ class _MyFilePickerState extends State<MyFilePicker> {
             width: 200,
             height: 100,
             child: Text(
-              "${image!.name}is not an image or video"
+              "${image!.name} is not an image or video"
             ),
           );
         }
