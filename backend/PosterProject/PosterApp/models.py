@@ -3,6 +3,7 @@ from platform import platform
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from .api_calls import send_post
 # Create your models here.
 
 
@@ -48,10 +49,11 @@ class Post(models.Model):
 
 	def save( self, *args, **kwargs ):
 	# Call save first, to create a primary key
+		new = self._state.adding
 		super().save( *args, **kwargs )
 
 		media = self.media
-		if media:
+		if media and new:
 			# Create new filename, using primary key and file extension
 			oldfile = self.media.name
 			last_slash = oldfile.rfind( '/' )
@@ -69,6 +71,17 @@ class Post(models.Model):
 				kwargs['force_update'] = True
 				kwargs['update_fields'] = ['media']
 				super().save( *args, **kwargs )
+		
+		if self.status == 'waiting':
+			platform_posts = PlatformPost.objects.filter(post=self)
+			print(platform_posts)
+			for platform_post in platform_posts:
+				if platform_post.status != 'published' and platform_post.status != 'waiting':
+					platform_post.status = 'waiting'
+					platform_post.save()
+			if (PlatformPost.objects.filter(post=self, status="published").count() == platform_posts.count()):
+				self.status = 'published'
+				super().save(force_update=True, update_fields=['status'])
 
 
 class Platform(models.Model):
@@ -113,3 +126,8 @@ class PlatformPost(models.Model):
 		('delayed', 'Delayed'),
 	)
 	status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
+
+	def save(self, *args, **kwargs):
+		super().save(*args, **kwargs)
+		if (self.status == 'waiting'):
+			send_post(self)

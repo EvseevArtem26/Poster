@@ -174,7 +174,7 @@ class PostService {
     );
     var response = await http.patch(
       url,
-      body: jsonEncode({'status': 'published'}),
+      body: jsonEncode({'status': 'waiting'}),
       headers: {
         "content-type": "application/json",
         "accept": "application/json",

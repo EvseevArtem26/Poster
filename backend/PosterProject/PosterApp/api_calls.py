@@ -6,9 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 import selenium.webdriver.support.expected_conditions as EC
-from concurrent import futures
 import time
-from .models import PlatformPost
 
 
 # decorator for measuring elapsed time
@@ -32,18 +30,7 @@ def get_mime_type(file):
 
 def initialize_driver(headless=True, vpn=False):
     # TODO: run driver in another process
-
-    PROXY = "195.181.174.139:3128"
-    proxy_url = "72.221.196.157:35904"
-    proxy = Proxy({
-    'proxyType': ProxyType.MANUAL,
-    'httpProxy': proxy_url,
-    'sslProxy': proxy_url,
-    'ftpProxy': proxy_url,
-    'noProxy': ''})
     capabilities = webdriver.DesiredCapabilities.CHROME
-    # proxy.add_to_capabilities(capabilities)
-
     options = webdriver.ChromeOptions()
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--ignore-ssl-errors')
@@ -54,7 +41,6 @@ def initialize_driver(headless=True, vpn=False):
     # options.add_argument('window-size=1920x1080')
     if vpn:
         options.add_extension(r'C:\Users\Luzif\AppData\Local\Google\Chrome\User Data\Default\Extensions\omghfjlpggmjjaagoclmmobgdodcjboh/3.50.0_0.crx')
-    # options.add_argument(f"--proxy-server={proxy_url}")
     driver  = webdriver.Chrome(options=options, desired_capabilities=capabilities)
 
     return driver
@@ -81,10 +67,6 @@ def send_post(post):
     if post.platform.platform == 'TW':
         driver = initialize_driver(headless=False, vpn=True)
         send_post_to_twitter(driver, post)
-        driver.quit()
-    if post.platform.platform == 'FB':
-        driver = initialize_driver(headless=False, vpn=True)
-        send_post_to_facebook(driver, post)
         driver.quit()
 
 
@@ -115,7 +97,17 @@ def send_post_to_odnoklassniki(driver, post):
             time.sleep(3)
             driver.find_element(by=By.XPATH, value="//*[@id='hook_Block_PopLayer']/div/photo-picker/div/div/div[2]/div/div[3]/div[2]/div[1]/span/input").send_keys(post.media.path)
             time.sleep(3)
+        if get_mime_type(post.media) == 'video':
+            # driver.find_element(by=By.XPATH, value="//*[@data-l='t,button.video']").click()
+            # time.sleep(3)
+            # driver.find_element(by=By.XPATH, value="//*[@id='hook_Block_PFVideoAttachUploadBlock']/div/div/div[2]/span/input").send_keys(post.media.path)
+            # wait until submit button is enabled
+            # WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//*[@class='posting_f_ac']/div[2]")))
+            time.sleep(3)
+            # time.sleep(10)
     submit_button.click()
+    post.status = 'published'
+    post.save()
 
 @time_this
 def send_post_to_vkontakte(driver, post):
@@ -153,6 +145,8 @@ def send_post_to_vkontakte(driver, post):
     action.key_up(Keys.CONTROL)
     action.perform()
     time.sleep(1)
+    post.status = 'published'
+    post.save()
 
 
 @time_this
@@ -189,6 +183,8 @@ def send_post_to_twitter(driver, post):
     action.key_up(Keys.CONTROL)
     action.perform()
     time.sleep(5)
+    post.status = 'published'
+    post.save()
 
 @time_this
 def send_post_to_facebook(driver, post):
@@ -208,33 +204,3 @@ def send_post_to_facebook(driver, post):
     time.sleep(5)
     driver.find_element(by=By.XPATH, value="//*[@aria-label='Опубликовать']").click()
     time.sleep(5)
-
-
-def send_post_to_tiktok(driver, post):
-    phone = post.platform.phone_number
-    password = post.platform.password
-    driver.get("https://www.tiktok.com/login/phone-or-email/phone-password")
-
-
-
-
-@time_this
-def send_post_experimental(post):
-    platform_posts = PlatformPost.objects.filter(post=post)
-    with futures.ThreadPoolExecutor() as executor:
-        executor.map(send_post_to_platform, platform_posts)
-    # for platform_post in platform_posts:
-        # send_post_to_platform(platform_post)
-
-@time_this
-def send_post_to_platform(platform_post):
-    # headless = platform_post.platform.platform != 'TW'
-    headless = False
-    driver = initialize_driver(headless=headless)
-    if platform_post.platform.platform == 'OK':
-        send_post_to_odnoklassniki(driver, platform_post)
-    if platform_post.platform.platform == 'VK':
-        send_post_to_vkontakte(driver, platform_post)
-    if platform_post.platform.platform == 'TW':
-        send_post_to_twitter(driver, platform_post)
-    driver.quit()

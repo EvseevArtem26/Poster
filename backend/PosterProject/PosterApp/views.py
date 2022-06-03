@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from .api_calls import send_post, send_post_experimental
+from .api_calls import send_post
 
 
 # User viewset
@@ -39,6 +39,14 @@ class PostViewSet(ModelViewSet):
 		if status:
 			queryset = queryset.filter(status=status)
 		return queryset
+
+	def partial_update(self, request, *args, **kwargs):
+		instance = self.get_object()
+		serializer = PostSerializer(instance, data=request.data, partial=True)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 # Platform viewset
@@ -79,33 +87,6 @@ class PlatformPostViewSet(ModelViewSet):
 		serializer = PlatformPostSerializer(data=data)
 		if serializer.is_valid():
 			serializer.save()
-			send_post(serializer.instance)
-			return Response(serializer.data, status=status.HTTP_201_CREATED)
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class MultiPostListCreateView(generics.ListCreateAPIView):
-	serializer_class = MultiPostSerializer
-	parser_classes = [MultiPartParser, FormParser, JSONParser]
-	authentication_classes = [authentication.TokenAuthentication]
-	permission_classes = [IsAuthenticated]
-	
-	def get_queryset(self):
-		queryset = Post.objects.all()
-		params = self.request.query_params
-		user = params.get('username', None)
-		status = params.get('status', None)
-		if user:
-			queryset = queryset.filter(author__username=user)
-		if status:
-			queryset = queryset.filter(status=status)
-		return queryset
-
-
-	def create(self, request, *args, **kwargs):
-		serializer = MultiPostSerializer(data=request.data)
-		if serializer.is_valid():
-			serializer.save()
-			send_post_experimental(serializer.instance)
+			# send_post(serializer.instance)
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
