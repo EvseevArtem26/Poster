@@ -91,14 +91,14 @@ class _HomePageState extends State<HomePage> {
                 builder: (context, snapshot){
                   if(snapshot.hasData){
                     List<Platform> platforms = snapshot.data as List<Platform>;
-                    int itemcount = platforms.length > 7 ? 8 : platforms.length + 1;
+                    int itemcount = platforms.length > 8 ? 9 : platforms.length + 1;
                     return Swiper(
                       itemCount: itemcount,
                       itemWidth: 1000,
                       itemHeight: 600,
                       itemBuilder: (context, index){
                         if(itemcount > platforms.length && index == itemcount-1){
-                          Set<String> allPlatforms = {"VK", "FB", "TW", "IG", "TT", "YT", "TG", "OK"};
+                          Set<String> allPlatforms = {"VK", "FB", "TW", "IG", "TT", "YT", "TG", "OK", "PT"};
                           Set<String> existingPlatforms = platforms.map((platform) => platform.platform).toSet();
                           Set<String> availablePlatforms = allPlatforms.difference(existingPlatforms);
                           return Center(

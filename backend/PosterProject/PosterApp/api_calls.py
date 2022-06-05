@@ -6,6 +6,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 import selenium.webdriver.support.expected_conditions as EC
+from py3pin.Pinterest import Pinterest
+
 import time
 
 
@@ -40,35 +42,41 @@ def initialize_driver(headless=True, vpn=False):
     # options.add_argument('--disable-gpu')
     # options.add_argument('window-size=1920x1080')
     if vpn:
-        options.add_extension(r'C:\Users\Luzif\AppData\Local\Google\Chrome\User Data\Default\Extensions\omghfjlpggmjjaagoclmmobgdodcjboh/3.50.0_0.crx')
+        options.add_extension(r'C:\Users\Luzif\AppData\Local\Google\Chrome\User Data\Default\Extensions\jaoafpkngncfpfggjefnekilbkcpjdgp\7.1.0_0.crx')
     driver  = webdriver.Chrome(options=options, desired_capabilities=capabilities)
 
     return driver
 
 
 def activate_vpn(driver):
-    driver.get("chrome-extension://omghfjlpggmjjaagoclmmobgdodcjboh/popup/popup.html")
+    driver.get("chrome-extension://jaoafpkngncfpfggjefnekilbkcpjdgp/popup/popup.html")
+    p = driver.current_window_handle
     time.sleep(5)
-    driver.execute_script("document.querySelector('div.MainContainer page-switch').shadowRoot.querySelector('div.In main-index').shadowRoot.querySelector('div.Foot c-switch').click()")
-    time.sleep(2)
+    driver.switch_to.window(p)
+    time.sleep(3)
+    driver.find_element(by=By.XPATH, value="//*[@id='error']/main/div[2]/a").click()
+    time.sleep(3)
+    driver.find_element(by=By.XPATH, value="//*[@id='home']/div[2]/div[2]/div[1]").click()
+    time.sleep(4)
 
 
 @time_this
 def send_post(post):
     # send post to platform
     if post.platform.platform == 'OK':
-        driver = initialize_driver(headless=False)
+        driver = initialize_driver(headless=True)
         send_post_to_odnoklassniki(driver, post)
         driver.quit()
     if post.platform.platform == 'VK':
-        driver = initialize_driver(headless=False)
+        driver = initialize_driver(headless=True)
         send_post_to_vkontakte(driver, post)
         driver.quit()
     if post.platform.platform == 'TW':
         driver = initialize_driver(headless=False, vpn=True)
         send_post_to_twitter(driver, post)
         driver.quit()
-
+    if post.platform.platform == "PT":
+        send_post_to_pinterest(post)
 
 @time_this
 def send_post_to_odnoklassniki(driver, post):
@@ -175,7 +183,7 @@ def send_post_to_twitter(driver, post):
     if post.media and get_mime_type(post.media) == 'image':
         driver.find_element(by=By.XPATH,
         value="//*[@id='layers']/div[2]/div/div/div/div/div/div[2]/div[2]/div/div/div/div[3]/div/div[1]/div/div/div/div/div[2]/div[3]/div/div/div[1]/input").send_keys(post.media.path)
-        time.sleep(5)
+        time.sleep(15)
 
     action = ActionChains(driver)
     action.key_down(Keys.CONTROL)
@@ -204,3 +212,39 @@ def send_post_to_facebook(driver, post):
     time.sleep(5)
     driver.find_element(by=By.XPATH, value="//*[@aria-label='Опубликовать']").click()
     time.sleep(5)
+
+@time_this
+def send_post_to_pinterest(post):
+    
+    login = post.platform.login
+    email = post.platform.email
+    password = post.platform.password
+    if post.media and get_mime_type(post.media) == 'image':
+        image_path = post.media.path
+    else:
+        return
+
+
+    pinterest = Pinterest(
+        email=email,
+        password=password,
+        username=login,
+        cred_root="pin_creds"
+        )
+
+    pinterest.login()
+
+    parts = post.text.split('/n', 1)
+    title = parts[0]
+    description = parts[1] if len(parts) > 1 else ''
+        
+
+    pinterest.upload_pin(
+        board_id="620230248622142690",
+        image_file=image_path,
+        description=description,
+        title=title,
+        )
+    
+    post.status = 'published'
+    post.save()

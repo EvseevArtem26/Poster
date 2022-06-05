@@ -97,7 +97,8 @@ class Platform(models.Model):
 		('IG', 'Instagram'),
 		('TT', 'TikTok'),
 		('YT', 'Youtube'),
-		('TG', 'Telegram')
+		('TG', 'Telegram'),
+		('PT', 'Pinterest'),
 	]
 	platform = models.CharField(max_length=2, choices=PLATFORM_CHOICES)
 	user = models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='user', on_delete=models.CASCADE)
