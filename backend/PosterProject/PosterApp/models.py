@@ -48,29 +48,23 @@ class Post(models.Model):
 	status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
 
 	def save( self, *args, **kwargs ):
-	# Call save first, to create a primary key
 		new = self._state.adding
-		super().save( *args, **kwargs )
-
 		media = self.media
+		if new:
+		# if post is new, do not save media
+			self.media = None
+		else:
+		# if image is changed, delete old image
+			try:
+				this = Post.objects.get(pk=self.pk)
+				if this.media != self.media:
+					this.media.delete(save=False)
+			except:
+				pass
+		super().save( *args, **kwargs )
+		self.media = media
 		if media and new:
-			# Create new filename, using primary key and file extension
-			oldfile = self.media.name
-			last_slash = oldfile.rfind( '/' )
-			newfile = self.media_path(oldfile[last_slash:])
-
-			# Create new file and remove old one
-			if newfile != oldfile:
-				self.media.storage.delete( newfile )
-				savedfile = self.media.storage.save( newfile, media )
-				self.media.name = savedfile
-				self.media.close()
-				self.media.storage.delete( oldfile )
-				# Save again to keep changes
-				kwargs['force_insert'] = False
-				kwargs['force_update'] = True
-				kwargs['update_fields'] = ['media']
-				super().save( *args, **kwargs )
+			super().save(force_insert=False, force_update=True, update_fields=['media'])
 		
 		if self.status == 'waiting':
 			platform_posts = PlatformPost.objects.filter(post=self)
@@ -83,6 +77,10 @@ class Post(models.Model):
 				self.status = 'published'
 				super().save(force_update=True, update_fields=['status'])
 
+	def delete(self, *args, **kwargs):
+		if self.media:
+			self.media.delete()
+		super().delete(*args, **kwargs)
 
 class Platform(models.Model):
 	login = models.CharField(max_length=60)
@@ -129,6 +127,18 @@ class PlatformPost(models.Model):
 	status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
 
 	def save(self, *args, **kwargs):
+		if not self._state.adding:
+			try:
+				this = PlatformPost.objects.get(pk=self.pk)
+				if this.media != self.media:
+					this.media.delete(save=False)
+			except:
+				pass
 		super().save(*args, **kwargs)
 		if (self.status == 'waiting'):
 			send_post(self)
+
+	def delete(self, *args, **kwargs):
+		if self.media:
+			self.media.delete()
+		super().delete(*args, **kwargs)
