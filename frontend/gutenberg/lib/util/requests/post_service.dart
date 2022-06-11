@@ -33,7 +33,8 @@ class PostService {
       },
     );
     if (response.statusCode == 200) {
-      List<dynamic> body = jsonDecode(response.body);
+      List<dynamic> body = jsonDecode(utf8.decode(response.bodyBytes));
+      
       return List<Post>.from(body.map((x) => Post.fromJson(x)));
     } else {
       throw Exception('Failed to load posts');

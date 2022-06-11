@@ -22,7 +22,7 @@ class PlatformService {
       },
     );
     if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
+      List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
       List<Platform> platforms = [];
       for (var i = 0; i < data.length; i++) {
         platforms.add(Platform.fromJson(data[i]));
