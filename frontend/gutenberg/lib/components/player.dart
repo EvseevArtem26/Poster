@@ -39,31 +39,37 @@ class _PlayerState extends State<Player> {
       future: _initializeVideoPlayerFuture,
       builder: (context, snapshot){
         if(snapshot.connectionState == ConnectionState.done){
-          return Stack(
-            children: [
-              AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
-              ),
-              Center(
-                child: IconButton(
-                  icon: Icon(
-                    _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.white,
+          return Container(
+            alignment: Alignment.center,
+            height: 300,
+            child: Stack(
+              children: [
+                Center(
+                  child: AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio,
+                    child: VideoPlayer(_controller),
                   ),
-                  onPressed: (){
-                    setState(() {
-                      if(_controller.value.isPlaying){
-                        _controller.pause();
-                      }
-                      else {
-                        _controller.play();
-                      }
-                    });
-                  },
+                ),
+                Center(
+                  child: IconButton(
+                    icon: Icon(
+                      _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                      color: Colors.white,
+                    ),
+                    onPressed: (){
+                      setState(() {
+                        if(_controller.value.isPlaying){
+                          _controller.pause();
+                        }
+                        else {
+                          _controller.play();
+                        }
+                      });
+                    },
+                  )
                 )
-              )
-            ],
+              ],
+            ),
           );
         }
         else {

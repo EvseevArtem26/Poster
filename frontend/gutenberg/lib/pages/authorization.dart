@@ -40,9 +40,9 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
             Card(
               color: Theme.of(context).cardColor,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(5),
                 side: BorderSide(
-                  color: Theme.of(context).primaryColor,
+                  color: Theme.of(context).colorScheme.primary,
                   width: 2,
                 ),
               ),
@@ -62,9 +62,9 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                       TextFormField(
                         controller: loginController,
                         decoration: InputDecoration(
-                          hintText: "Username or email",
+                          hintText: "Логин",
                           hintStyle: GoogleFonts.secularOne(
-                            color: const Color.fromARGB(255, 128, 128, 128)
+                            // color: const Color.fromARGB(255, 128, 128, 128)
                           ),
                           filled: true,
                           // fillColor: Colors.white,
@@ -72,17 +72,17 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                             width: 450,
                             height: 100
                           ),
-                          enabledBorder: const OutlineInputBorder(
+                          enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(
-                              // color: Colors.white,
+                               color: Theme.of(context).colorScheme.primary,
                             ),
-                            borderRadius: BorderRadius.all(Radius.circular(40.0)),
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
                           ),
-                          focusedBorder: const OutlineInputBorder(
+                          focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
-                              // color: Colors.white,
+                               color: Theme.of(context).colorScheme.primary,
                             ),
-                            borderRadius: BorderRadius.all(Radius.circular(40.0)),
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
                           ),
                         ),
                         textAlign: TextAlign.center,
@@ -94,7 +94,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                         controller: passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
-                          hintText: "Password",
+                          hintText: "Пароль",
                           hintStyle: GoogleFonts.secularOne(
                             // color: const Color.fromARGB(255, 128, 128, 128)
                           ),
@@ -104,17 +104,17 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                             width: 450,
                             height: 100
                           ),
-                          enabledBorder: const OutlineInputBorder(
+                          enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(
-                              // color: Colors.white,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
-                            borderRadius: BorderRadius.all(Radius.circular(40.0)),
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
                           ),
-                          focusedBorder: const OutlineInputBorder(
+                          focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
-                              // color: Colors.white,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
-                            borderRadius: BorderRadius.all(Radius.circular(40.0)),
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
                           ),
                         ),
                         textAlign: TextAlign.center,
@@ -140,7 +140,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                           // ),
                           shape: MaterialStateProperty.resolveWith(
                             (states) => const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(40.0))
+                                  borderRadius: BorderRadius.all(Radius.circular(10.0))
                             ),
                           ),
                           textStyle: MaterialStateProperty.resolveWith(
@@ -156,8 +156,8 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                           ),
                           fixedSize: MaterialStateProperty.resolveWith(
                             (states) => states.contains(MaterialState.disabled)
-                              ? const Size(300, 100)
-                              : const Size(300, 100),
+                              ? const Size(200, 70)
+                              : const Size(200, 70),
                           ),
                           padding: MaterialStateProperty.resolveWith((states) => 
                             states.contains(MaterialState.disabled)
@@ -166,7 +166,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                           ),
                         ),
                         child:  Text(
-                          "Sign in",
+                          "Войти",
                           style: GoogleFonts.secularOne(
                             // color: Colors.black,
                             fontSize: 24,
@@ -180,7 +180,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
             ),
             TextButton(
               child: Text(
-                'Create an account',
+                'Создать аккаунт',
                 style: GoogleFonts.roboto(
                   fontSize: 36,
                   // color: const Color.fromARGB(255, 50, 50, 50),
